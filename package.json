@@ -1,0 +1,39 @@
+{
+	"name": "tracking-report",
+	"version": "0.0.1",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "node --watch src/index",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"lint": "eslint . --ext .js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"dependencies": {
+		"atx-prettylog": "^1.0.3",
+		"awilix": "^13.0.5",
+		"compression": "^1.8.1",
+		"cors": "^2.8.6",
+		"dotenv": "^17.4.2",
+		"express": "^5.2.1",
+		"http-status-codes": "^2.3.0",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.6",
+		"@types/node": "^26.0.1",
+		"eslint": "^10.6.0",
+		"globals": "^17.7.0",
+		"vitest": "^4.1.9"
+	},
+	"engines": {
+		"node": ">=24.0.0"
+	},
+	"packageManager": "pnpm@11.9.0"
+}
