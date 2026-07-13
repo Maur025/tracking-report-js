@@ -3,7 +3,6 @@ import { logger } from "./core/common/logger.js";
 import { iocContainer } from "./config/ioc/ioc-container.js";
 import { socketClientHandler } from "./core/socket-client/socket-client-handler.js";
 import { dbProvider } from "./core/database/db-provider.js";
-import { enterpriseConfigDbRepository } from "./modules/enterprise/enterprise-config-db.repository.js";
 
 async function bootstrap() {
 	const environment = iocContainer.resolve("environment");
@@ -13,6 +12,10 @@ async function bootstrap() {
 	const { dbClient, migrateDb } = dbProvider({ environment });
 
 	containerAdapter.registerValue("dbClient", dbClient);
+
+	const enterpriseConfigDbRepository = iocContainer.resolve("enterpriseConfigDbRepository");
+
+	console.log(enterpriseConfigDbRepository);
 
 	/**
 	 * @type {import('./core/server-app.js').ServerApp}
@@ -28,7 +31,6 @@ async function bootstrap() {
 		setupScheduler,
 	} = await socketClientHandler({
 		environment,
-		dbClient,
 		enterpriseConfigDbRepository,
 	});
 

@@ -5,6 +5,7 @@ import { ServerApp } from "../../core/server-app.js";
 import { ReportController } from "../../modules/report.controller.js";
 import { ErrorHandler } from "../../core/error-handler.js";
 import { ContainerAdapter } from "./container-adapter.js";
+import { enterpriseConfigDbRepository } from "../../modules/enterprise/enterprise-config-db.repository.js";
 
 const iocContainer = createContainer({
 	injectionMode: InjectionMode.PROXY,
@@ -34,6 +35,9 @@ iocContainer.register({
 	controllers: asFunction(() =>
 		controllerModules.map((module) => iocContainer.resolve(module.name)),
 	).singleton(),
+
+	//repositories
+	enterpriseConfigDbRepository: asFunction(enterpriseConfigDbRepository).singleton(),
 });
 
 export { iocContainer };

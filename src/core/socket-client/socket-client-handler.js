@@ -6,12 +6,8 @@ import { Scheduler } from "./scheduler.cjs";
  * @param {object} request
  * @param {import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository} request.enterpriseConfigDbRepository
  */
-export const socketClientHandler = async ({
-	environment,
-	dbClient,
-	enterpriseConfigDbRepository,
-}) => {
-	const { saveBulk } = enterpriseConfigDbRepository({ dbClient });
+export const socketClientHandler = async ({ environment, enterpriseConfigDbRepository }) => {
+	const { saveBulk } = enterpriseConfigDbRepository;
 
 	const scheduler = new Scheduler();
 
