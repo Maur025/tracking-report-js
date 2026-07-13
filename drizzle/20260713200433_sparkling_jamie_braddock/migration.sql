@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS `enterprise_config_dbs_reference_id_unique`;--> statement-breakpoint
+CREATE UNIQUE INDEX `enterprise_config_dbs_reference,db,enterprise_id_unique` ON `enterprise_config_dbs` (`database`,`reference_id`,`enterprise_ref_id`);

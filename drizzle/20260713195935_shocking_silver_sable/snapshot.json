@@ -1,0 +1,142 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "fde4b8e6-4624-4987-ae04-ed0f93bbc7f5",
+  "prevIds": [
+    "4724d165-b218-4665-adad-c3ae2f24e65a"
+  ],
+  "ddl": [
+    {
+      "name": "enterprise_config_dbs",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_by",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_by",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "host",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "port",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "database",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "reference_id",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "enterprise_ref_id",
+      "entityType": "columns",
+      "table": "enterprise_config_dbs"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "enterprise_config_dbs_pk",
+      "table": "enterprise_config_dbs",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "database",
+          "isExpression": false
+        },
+        {
+          "value": "reference_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "enterprise_config_dbs_reference_id_unique",
+      "entityType": "indexes",
+      "table": "enterprise_config_dbs"
+    }
+  ],
+  "renames": []
+}

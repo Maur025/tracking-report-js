@@ -1,0 +1,1 @@
+ALTER TABLE `enterprise_config_dbs` ADD `enterprise_ref_id` text NOT NULL;
