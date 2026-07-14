@@ -15,8 +15,6 @@ async function bootstrap() {
 
 	const enterpriseConfigDbRepository = iocContainer.resolve("enterpriseConfigDbRepository");
 
-	console.log(enterpriseConfigDbRepository);
-
 	/**
 	 * @type {import('./core/server-app.js').ServerApp}
 	 */
