@@ -62,6 +62,16 @@ export const socketClientHandler = async ({ environment, enterpriseConfigDbRepos
 					enterpriseRefId: enterprise.id || null,
 				};
 
+				if (
+					!enterpriseData.host ||
+					!enterpriseData.port ||
+					!enterpriseData.database ||
+					!enterpriseData.referenceId ||
+					!enterpriseData.enterpriseRefId
+				) {
+					continue;
+				}
+
 				enterprisesToSave.push(enterpriseData);
 			}
 

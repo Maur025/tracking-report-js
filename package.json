@@ -18,6 +18,7 @@
 		"@libsql/client": "^0.17.4",
 		"atx-prettylog": "^1.0.3",
 		"awilix": "^13.0.5",
+		"axios": "^1.18.1",
 		"chalk": "^5.6.2",
 		"compression": "^1.8.1",
 		"cors": "^2.8.6",

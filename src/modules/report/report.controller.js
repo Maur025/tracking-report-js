@@ -1,10 +1,17 @@
-import generatePdf from "../../core/pdf/generate-pdf.js";
-import { pdfGenerateExample } from "../../core/pdf/pdf-make-example-v3.js";
+import { eventReportGetData } from "./event-report-get-data.js";
+import { eventReport } from "./event-report.js";
 
 export class ReportController {
 	#resource = "reports";
+	#axios;
 
-	constructor() {}
+	/**
+	 * @param {object} request
+	 * @param {import('axios')} request.axios
+	 */
+	constructor({ axios }) {
+		this.#axios = axios;
+	}
 
 	/** @param {import('express').Application} app*/
 	registerRoutes(app, basePath) {
@@ -16,34 +23,20 @@ export class ReportController {
 	 * @param {import('express').Response} res
 	 */
 	async #handleDefaultGet(req, res) {
-		console.log("ESTA EN REPORT CONTROLLER");
+		const { page = 0, size = 20, sortBy = "date", descending = true } = req.query;
 
-		// await pdfMakeExample(res);
-
-		// await pdfGenerateExample(res);
-
-		const pdfStream = await generatePdf({
-			data: {},
-			template: {},
-			output: "stream",
+		const eventData = await eventReportGetData({
+			axios: this.#axios,
+			dbHost: "http://172.20.1.5:9999",
+			dbName: "trackingdb",
+			pagination: {
+				page: Number(page),
+				size: Number(size),
+				sortBy,
+				descending: Boolean(descending),
+			},
 		});
 
-		res.setHeader("Content-Type", "application/pdf");
-		res.setHeader("Content-Disposition", 'attachment; filename="example.pdf"');
-
-		pdfStream.pipe(res, {
-			end: true,
-		});
-
-		pdfStream.end();
-
-		pdfStream.on("end", () => {
-			console.log("Streaming finalized");
-		});
-
-		pdfStream.on("error", (err) => {
-			console.info(`[PDF] Error streaming PDF:`, err);
-			res.status(500).send("Error streaming PDF");
-		});
+		await eventReport({ res, reportData: eventData });
 	}
 }

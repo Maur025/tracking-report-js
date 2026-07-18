@@ -6,6 +6,7 @@ import { ReportController } from "../../modules/report/report.controller.js";
 import { ErrorHandler } from "../../core/error-handler.js";
 import { ContainerAdapter } from "./container-adapter.js";
 import { enterpriseConfigDbRepository } from "../../modules/enterprise/enterprise-config-db.repository.js";
+import axios from "axios";
 
 const iocContainer = createContainer({
 	injectionMode: InjectionMode.PROXY,
@@ -19,6 +20,7 @@ const controllerModules = listModules("**/*.controller.js").map((module) => {
 iocContainer.register({
 	// external dependencies
 	express: asValue(express),
+	axios: asValue(axios),
 
 	// config
 	environment: asValue(environment),
