@@ -27,6 +27,7 @@
 		"exceljs": "^4.4.0",
 		"express": "^5.2.1",
 		"http-status-codes": "^2.3.0",
+		"pdfkit": "^0.19.1",
 		"pdfmake": "^0.3.11",
 		"tracking-common": "file:../tracking-common",
 		"uuid": "^14.0.1",

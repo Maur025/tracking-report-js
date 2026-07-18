@@ -3,6 +3,7 @@ import { cwd } from "node:process";
 import pdfMake from "pdfmake";
 import { logger } from "../common/logger.js";
 import { getFormatDate } from "../common/get-format-date.js";
+import { cmToPoints } from "../common/cm-to-points.js";
 
 export const generatePdfReport = ({ res }) => {
 	const fontPath = path.resolve(cwd(), "src/core/pdf/fonts");
@@ -53,8 +54,6 @@ export const generatePdfReport = ({ res }) => {
 		};
 
 	const setFooter = (footerFn) => (document) => ({ ...document, footer: footerFn });
-
-	const cmToPoints = (cm) => cm * (72 / 2.54);
 
 	const getCurrentDate = () => {
 		const now = new Date();

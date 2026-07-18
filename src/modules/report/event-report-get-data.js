@@ -10,11 +10,17 @@ export const eventReportGetData = async ({
 		sortBy: "date",
 		descending: true,
 	},
-	filters,
+	filters = {},
 }) => {
-	const response = await axios.get(
-		`${dbHost}/${dbName}/registry_events/eventnotification?size=${pagination.size}&page=${pagination.page}&sortBy=${pagination.sortBy}&descending=${pagination.descending}`,
-	);
+	const response = await axios.get(`${dbHost}/${dbName}/registry_events/eventnotification`, {
+		params: {
+			...filters,
+			page: pagination.page,
+			size: pagination.size,
+			sortBy: pagination.sortBy,
+			descending: pagination.descending,
+		},
+	});
 
 	if (response.status >= 400 && response.status <= 599) {
 		throw new Error(
