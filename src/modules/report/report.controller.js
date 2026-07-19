@@ -1,5 +1,6 @@
-import { eventReportGetData } from "./event-report-get-data.js";
-import { eventReport } from "./event-report.js";
+import { buildDocument, initDocument } from "../../core/pdf/generate-pdf.js";
+import { reportTable } from "../../core/pdf/report-table.js";
+import { eventReportStream } from "./event-report-stream.js";
 
 export class ReportController {
 	#resource = "reports";
@@ -23,20 +24,49 @@ export class ReportController {
 	 * @param {import('express').Response} res
 	 */
 	async #handleDefaultGet(req, res) {
-		const { page = 0, size = 20, sortBy = "date", descending = true } = req.query;
+		const {
+			sortBy = "date",
+			descending = true,
+			disposition = "inline",
+			fileName = "example",
+		} = req.query;
 
-		const eventData = await eventReportGetData({
-			axios: this.#axios,
-			dbHost: "http://172.20.1.5:9999",
-			dbName: "trackingdb",
-			pagination: {
-				page: Number(page),
-				size: Number(size),
-				sortBy,
-				descending: Boolean(descending),
-			},
-		});
+		const dataSource = () =>
+			eventReportStream({
+				axios: this.#axios,
+				database: {
+					name: "trackingdb",
+					host: "http://172.20.1.5:9999",
+				},
+				pagination: { sortBy, descending },
+			});
 
-		await eventReport({ res, reportData: eventData });
+		// const eventData = await eventReportGetData({
+		// 	axios: this.#axios,
+		// 	dbHost: "http://172.20.1.5:9999",
+		// 	dbName: "trackingdb",
+		// 	pagination: {
+		// 		page: Number(page),
+		// 		size: Number(size),
+		// 		sortBy,
+		// 		descending: Boolean(descending),
+		// 	},
+		// });
+
+		const builder = buildDocument(reportTable(dataSource));
+
+		const document = builder(
+			initDocument({
+				pageSize: "LETTER",
+				pageMargins: { top: 2, bottom: 1, left: 2.5, right: 1, unit: "cm" },
+				res,
+				disposition,
+				fileName,
+			}),
+		);
+
+		console.log(document);
+
+		// await eventReport({ res, reportData: eventData });
 	}
 }
