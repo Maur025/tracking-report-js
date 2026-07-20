@@ -59,6 +59,25 @@ const reportTableTemplate = (document) => {
 		document.moveTo(startXPosition, yPosition).lineTo(endX, yPosition).stroke();
 	};
 
+	const addFooter = ({ footerHeight, pageNumber, paddingTop }) => {
+		const yPosition =
+			document.page.height - document.page.margins.bottom - footerHeight + paddingTop;
+
+		const currentDate = getFormatDate({ date: new Date() });
+
+		document
+			.fontSize(8)
+			.text(`Página ${pageNumber}`, document.page.margins.left, yPosition, { width: 150 })
+			.text(
+				`Fecha de impresión: ${currentDate}`,
+				document.page.width - document.page.margins.right - 150,
+				yPosition,
+				{
+					width: 150,
+				},
+			);
+	};
+
 	return {
 		doc: document,
 		setMainTitle,
@@ -66,6 +85,7 @@ const reportTableTemplate = (document) => {
 		calculateColumnXPositions,
 		addTableHeader,
 		addHorizontalLine,
+		addFooter,
 	};
 };
 
@@ -110,7 +130,10 @@ export const reportTable =
 			calculateColumnXPositions,
 			addTableHeader,
 			addHorizontalLine,
+			addFooter,
 		} = reportTableTemplate(document);
+
+		let pageNumber = 1;
 
 		setMainTitle(mainTitle);
 		buildHeader({ userName });
@@ -133,6 +156,9 @@ export const reportTable =
 		let index = 1;
 
 		const cellPaddingHorizontal = 4;
+		const footerHeight = 30;
+
+		addFooter({ footerHeight, pageNumber, paddingTop: 10 });
 
 		dataStream.on("data", (item) => {
 			const values = body(item, index);
@@ -156,7 +182,7 @@ export const reportTable =
 			const bottomMargin = doc.page.margins.bottom;
 			const pageHeight = doc.page.height;
 
-			if (currentY + maxCellHeight > pageHeight - bottomMargin) {
+			if (currentY + maxCellHeight > pageHeight - bottomMargin - footerHeight) {
 				doc.addPage();
 				currentY = doc.page.margins.top;
 			}
@@ -181,6 +207,12 @@ export const reportTable =
 			currentY += maxCellHeight + 6;
 
 			index++;
+		});
+
+		doc.on("pageAdded", () => {
+			pageNumber++;
+
+			addFooter({ footerHeight, pageNumber, paddingTop: 10 });
 		});
 
 		dataStream.on("end", () => {

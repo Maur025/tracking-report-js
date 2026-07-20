@@ -61,7 +61,7 @@ export class ReportController {
 				mainTitle: "REPORTE DE EVENTOS",
 				header: { userName: "Usuario de Prueba" },
 				table: {
-					columnWidths: [20, 80, 80, 100, 96, 100],
+					columnWidths: [30, 80, 80, 100, 96, 100],
 					headers: [
 						{ text: "Nro", fontSize: 10 },
 						{ text: "Fecha", fontSize: 10 },
@@ -87,7 +87,7 @@ export class ReportController {
 			}),
 		);
 
-		const document = builder(
+		builder(
 			initDocument({
 				pageSize: "LETTER",
 				pageMargins: { top: 2, bottom: 1, left: 2.5, right: 1, unit: "cm" },
@@ -96,8 +96,6 @@ export class ReportController {
 				fileName,
 			}),
 		);
-
-		console.log(document);
 
 		// await eventReport({ res, reportData: eventData });
 	}
