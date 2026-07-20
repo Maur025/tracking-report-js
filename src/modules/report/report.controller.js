@@ -1,5 +1,7 @@
+import { getFormatDate } from "../../core/common/get-format-date.js";
 import { buildDocument, initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
+import { getEventValues } from "./common/event-report-common.js";
 import { eventReportStream } from "./event-report-stream.js";
 
 export class ReportController {
@@ -53,7 +55,37 @@ export class ReportController {
 		// 	},
 		// });
 
-		const builder = buildDocument(reportTable(dataSource));
+		const builder = buildDocument(
+			reportTable({
+				dataSource,
+				mainTitle: "REPORTE DE EVENTOS",
+				header: { userName: "Usuario de Prueba" },
+				table: {
+					columnWidths: [20, 80, 80, 100, 96, 100],
+					headers: [
+						{ text: "Nro", fontSize: 10 },
+						{ text: "Fecha", fontSize: 10 },
+						{ text: "Tipo", fontSize: 10 },
+						{ text: "Regla", fontSize: 10 },
+						{ text: "Vehículo", fontSize: 10 },
+						{ text: "Evento", fontSize: 10 },
+					],
+					body: (item, index) => {
+						const { eventName, eventDetail } = getEventValues(item);
+						const formattedDate = getFormatDate({ date: new Date(item.date) });
+
+						return [
+							{ text: index, fontSize: 9 },
+							{ text: formattedDate, fontSize: 9 },
+							{ text: eventName, fontSize: 9 },
+							{ text: item.rule, fontSize: 9 },
+							{ text: item.vehicles, fontSize: 9 },
+							{ text: eventDetail, fontSize: 9 },
+						];
+					},
+				},
+			}),
+		);
 
 		const document = builder(
 			initDocument({
