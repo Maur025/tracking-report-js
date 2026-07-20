@@ -1,6 +1,5 @@
 import { Readable } from "node:stream";
 import { getFormatDate } from "../common/get-format-date.js";
-import { getEventValues } from "../../modules/report/common/event-report-common.js";
 import { logger } from "../common/logger.js";
 
 /** @param {typeof import('pdfkit')} document */
@@ -29,104 +28,169 @@ const reportTableTemplate = (document) => {
 		);
 	};
 
-	return { doc: document, setMainTitle, buildHeader };
+	const calculateColumnXPositions = (columnWidths = []) => {
+		const startX = document.page.margins.left;
+		const columnX = [startX];
+
+		let xPosition = startX;
+
+		for (const width of columnWidths) {
+			columnX.push(xPosition + width);
+			xPosition += width;
+		}
+
+		return { columnX, startX };
+	};
+
+	const addTableHeader = ({ headers = [], columnX = [], yPosition = 0 }) => {
+		document.fontSize(10);
+
+		for (let i = 0; i < headers.length; i++) {
+			const label = headers[i].text || "";
+			const xPosition = columnX[i] || document.page.margins.left;
+
+			document.text(label, xPosition, yPosition);
+		}
+	};
+
+	const addHorizontalLine = ({ startXPosition, yPosition, endXPosition }) => {
+		const endX = endXPosition || document.page.width - document.page.margins.right;
+
+		document.moveTo(startXPosition, yPosition).lineTo(endX, yPosition).stroke();
+	};
+
+	return {
+		doc: document,
+		setMainTitle,
+		buildHeader,
+		calculateColumnXPositions,
+		addTableHeader,
+		addHorizontalLine,
+	};
 };
 
-export const reportTable = (dataSource) => (document) => {
-	const { doc, setMainTitle, buildHeader } = reportTableTemplate(document);
+/**
+ * @typedef {object} HeaderObject
+ * @property {string} userName
+ * @property {Date} issueDate
+ * @property {string} filterBy
+ */
 
-	setMainTitle("REPORTE DE EVENTOS");
-	buildHeader({ userName: "Mauro" });
+/**
+ * @typedef {object} TableRowObject
+ * @property {string} text
+ * @property {number} fontSize
+ */
 
-	doc.moveDown(2);
+/**
+ * @typedef {object} TableObject
+ * @property {number[]} columnWidths
+ * @property {TableRowObject[]} headers
+ * @property {(item:object, index: number) => TableRowObject[]} body
+ */
 
-	const startX = doc.page.margins.left;
-	let currentY = doc.y;
+/**
+ * @param {object} request
+ * @param {Function} request.dataSource
+ * @param {string} request.mainTitle
+ * @param {HeaderObject} request.header
+ * @param {TableObject} request.table
+ */
+export const reportTable =
+	({ dataSource, mainTitle = "REPORT EXAMPLE", header = {}, table = {} }) =>
+	/**@param {typeof import('pdfkit')} document */
+	(document) => {
+		const { userName = "Sin Nombre" } = header;
+		const { columnWidths = [], headers = [], body = () => [] } = table;
 
-	const columnWidths = [30, 80, 80, 100, 96, 100];
+		const {
+			doc,
+			setMainTitle,
+			buildHeader,
+			calculateColumnXPositions,
+			addTableHeader,
+			addHorizontalLine,
+		} = reportTableTemplate(document);
 
-	let xPosition = startX;
-	const columnX = [startX];
+		setMainTitle(mainTitle);
+		buildHeader({ userName });
 
-	for (const width of columnWidths) {
-		columnX.push(xPosition + width);
-		xPosition += width;
-	}
+		doc.moveDown(2);
 
-	doc.fontSize(10)
-		.text("Nro", columnX[0], currentY)
-		.text("Fecha", columnX[1], currentY)
-		.text("Tipo", columnX[2], currentY)
-		.text("Regla", columnX[3], currentY)
-		.text("Vehículo", columnX[4], currentY)
-		.text("Evento", columnX[5], currentY);
+		const { columnX, startX } = calculateColumnXPositions(columnWidths);
 
-	currentY += 15;
-	doc.moveTo(startX, currentY)
-		.lineTo(doc.page.width - doc.page.margins.right, currentY)
-		.stroke();
+		let currentY = doc.y;
 
-	currentY += 10;
+		addTableHeader({ headers, columnX, yPosition: currentY });
 
-	const dataStream = Readable.from(dataSource());
-	let index = 1;
+		currentY += 15;
 
-	const cellPaddingHorizontal = 4;
+		addHorizontalLine({ startXPosition: startX, yPosition: currentY });
 
-	dataStream.on("data", (item) => {
-		const { eventName, eventDetail } = getEventValues(item);
-		const formattedDate = getFormatDate({ date: new Date(item.date) });
+		currentY += 10;
 
-		const values = [
-			index++ || "",
-			formattedDate || "",
-			eventName || "",
-			item.rule || "",
-			item.vehicles || "",
-			eventDetail || "",
-		];
+		const dataStream = Readable.from(dataSource());
+		let index = 1;
 
-		doc.fontSize(9);
-		let maxCellHeight = 0;
+		const cellPaddingHorizontal = 4;
 
-		for (let i = 0; i < columnWidths.length; i++) {
-			const usableWidth = columnWidths[i] - cellPaddingHorizontal * 2;
+		dataStream.on("data", (item) => {
+			const values = body(item, index);
+			let maxCellHeight = 0;
 
-			const cellHeight = doc.heightOfString(values[i], { width: usableWidth });
+			for (let i = 0; i < columnWidths.length; i++) {
+				const rowValue = values[i].text || "";
+				const rowFontSize = values[i].fontSize || 9;
 
-			if (cellHeight > maxCellHeight) {
-				maxCellHeight = cellHeight;
+				doc.fontSize(rowFontSize);
+
+				const usableWidth = columnWidths[i] - cellPaddingHorizontal * 2;
+
+				const cellHeight = doc.heightOfString(rowValue, { width: usableWidth });
+
+				if (cellHeight > maxCellHeight) {
+					maxCellHeight = cellHeight;
+				}
 			}
-		}
 
-		const bottomMargin = doc.page.margins.bottom;
-		const pageHeight = doc.page.height;
+			const bottomMargin = doc.page.margins.bottom;
+			const pageHeight = doc.page.height;
 
-		if (currentY + maxCellHeight > pageHeight - bottomMargin) {
-			doc.addPage();
-			currentY = doc.page.margins.top;
-		}
+			if (currentY + maxCellHeight > pageHeight - bottomMargin) {
+				doc.addPage();
+				currentY = doc.page.margins.top;
+			}
 
-		for (let i = 0; i < columnWidths.length; i++) {
-			const usableWidth = columnWidths[i] - cellPaddingHorizontal * 2;
+			for (let i = 0; i < columnWidths.length; i++) {
+				const rowValue = values[i].text || "";
+				const rowFontSize = values[i].fontSize || 9;
 
-			doc.text(values[i], columnX[i] + cellPaddingHorizontal, currentY, {
-				width: usableWidth,
-				lineBreak: true,
-			});
-		}
+				const usableWidth = columnWidths[i] - cellPaddingHorizontal * 2;
 
-		currentY += maxCellHeight + 6;
-	});
+				doc.fontSize(rowFontSize).text(
+					rowValue,
+					columnX[i] + cellPaddingHorizontal,
+					currentY,
+					{
+						width: usableWidth,
+						lineBreak: true,
+					},
+				);
+			}
 
-	dataStream.on("end", () => {
-		doc.end();
-	});
+			currentY += maxCellHeight + 6;
 
-	dataStream.on("error", (err) => {
-		logger.error(`[PDF] Error generating PDF report:`, err);
-		doc.end();
-	});
+			index++;
+		});
 
-	return doc;
-};
+		dataStream.on("end", () => {
+			doc.end();
+		});
+
+		dataStream.on("error", (err) => {
+			logger.error(`[PDF] Error generating PDF report:`, err);
+			doc.end();
+		});
+
+		return doc;
+	};
