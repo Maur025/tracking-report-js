@@ -7,6 +7,7 @@ import { ErrorHandler } from "../../core/error-handler.js";
 import { ContainerAdapter } from "./container-adapter.js";
 import { enterpriseConfigDbRepository } from "../../modules/enterprise/enterprise-config-db.repository.js";
 import axios from "axios";
+import { getDatabaseConfig } from "../../modules/report/common/get-database-config.js";
 
 const iocContainer = createContainer({
 	injectionMode: InjectionMode.PROXY,
@@ -40,6 +41,9 @@ iocContainer.register({
 
 	//repositories
 	enterpriseConfigDbRepository: asFunction(enterpriseConfigDbRepository).singleton(),
+
+	// functions
+	getDatabaseConfig: asFunction(getDatabaseConfig).singleton(),
 });
 
 export { iocContainer };

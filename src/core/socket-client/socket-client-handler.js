@@ -4,7 +4,7 @@ import { Scheduler } from "./scheduler.cjs";
 /**
  *
  * @param {object} request
- * @param {import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository} request.enterpriseConfigDbRepository
+ * @param {ReturnType<typeof import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
  */
 export const socketClientHandler = async ({ environment, enterpriseConfigDbRepository }) => {
 	const { saveBulk } = enterpriseConfigDbRepository;
@@ -82,13 +82,13 @@ export const socketClientHandler = async ({ environment, enterpriseConfigDbRepos
 			//enterprises = _enterprises;
 			//wsClientGateway.wsClientManager.socket.emit("processor.all",backends);
 		});
-		wsClientGateway.on("devices.subscribe", (subscriptions) => {
-			console.log("wsClientGateway.subscriptions", subscriptions);
-		});
-		wsClientGateway.on("devices.unsubscribe.all", (subscriptions) => {
-			console.log("wsClientGateway.devices.unsubscribe.all", subscriptions);
-			wsClientGateway.wsClientManager.socket.emit("processor.all", subscriptions);
-		});
+		// wsClientGateway.on("devices.subscribe", (subscriptions) => {
+		// 	console.log("wsClientGateway.subscriptions", subscriptions);
+		// });
+		// wsClientGateway.on("devices.unsubscribe.all", (subscriptions) => {
+		// 	console.log("wsClientGateway.devices.unsubscribe.all", subscriptions);
+		// 	wsClientGateway.wsClientManager.socket.emit("processor.all", subscriptions);
+		// });
 	};
 
 	return {
