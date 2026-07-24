@@ -22,7 +22,14 @@ export const getDatabaseConfig = ({ enterpriseConfigDbRepository }) => {
 			throw new Error(`Database configuration is incomplete for database: ${databaseName}`);
 		}
 
-		return { host: `http://${databaseConfig.host}:${databaseConfig.port}` };
+		return {
+			host: `http://${databaseConfig.host}:${databaseConfig.port}`,
+			enterprise: {
+				name: databaseConfig.enterprise?.name || null,
+				image: databaseConfig.enterprise?.image || null,
+				color: databaseConfig.enterprise?.color || null,
+			},
+		};
 	};
 
 	return { getConfig };

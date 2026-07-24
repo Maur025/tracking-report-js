@@ -46,11 +46,14 @@ export class ReportController {
 
 		const { getConfig } = this.#getDatabaseConfig;
 
-		const { host } = await getConfig({ databaseName });
+		const { host, enterprise } = await getConfig({
+			databaseName,
+		});
 
 		await eventReport({
 			axios: this.#axios,
 			res,
+			enterpriseData: enterprise,
 			reportParams: { disposition, fileName },
 			databaseConfig: { name: databaseName, host },
 			paginationParams: { sortBy, descending },

@@ -1,5 +1,11 @@
 import { defineRelations } from "drizzle-orm";
 import * as schema from "./schema.js";
 
-// eslint-disable-next-line no-unused-vars
-export const relations = defineRelations(schema, (relation) => ({}));
+export const relations = defineRelations(schema, (relation) => ({
+	enterpriseConfigDbSchema: {
+		enterprise: relation.one.enterpriseSchema({
+			from: relation.enterpriseConfigDbSchema.enterpriseRefId,
+			to: relation.enterpriseSchema.id,
+		}),
+	},
+}));
