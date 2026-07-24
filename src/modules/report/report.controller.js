@@ -42,6 +42,7 @@ export class ReportController {
 			geofenceId,
 			type,
 			deventId,
+			filterByLabel,
 		} = eventReportQueryParam.parse(req.query);
 
 		const { getConfig } = this.#getDatabaseConfig;
@@ -65,6 +66,7 @@ export class ReportController {
 				type,
 				deventId,
 			},
+			filterByLabel,
 		});
 	}
 }

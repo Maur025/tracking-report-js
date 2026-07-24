@@ -1,16 +1,40 @@
 import { Readable } from "node:stream";
 import { getFormatDate } from "../common/get-format-date.js";
 import { logger } from "../common/logger.js";
+import { getFont } from "./generate-pdf.js";
 
 /** @param {typeof import('pdfkit')} document */
 const reportTableTemplate = (document) => {
-	const buildHeader = ({ userName = "Sin Nombre", issueDate = null, filterBy = null }) => {
-		document.fontSize(12);
+	const LOGO_WIDTH = 120;
+
+	const buildHeader = ({
+		userName = "Sin Nombre",
+		issueDate = null,
+		filterBy = null,
+		enterpriseName = null,
+		enterpriseLogo = null,
+	}) => {
+		if (enterpriseLogo) {
+			document.image(enterpriseLogo, document.page.margins.left, document.page.margins.top, {
+				height: 65,
+			});
+		}
+
+		const xPosition = document.page.margins.left + (enterpriseLogo ? LOGO_WIDTH : 0);
+
+		if (enterpriseName) {
+			document
+				.fontSize(12)
+				.text(`${enterpriseName}`, xPosition, document.page.margins.top + 16);
+		}
+
+		document.font(getFont("Inter").regular).fontSize(11);
+
 		if (userName) {
 			document.text(`Usuario: ${userName}`);
 		}
 		if (filterBy) {
-			document.text(filterBy);
+			document.text(`Filtros: ${filterBy}`);
 		}
 
 		document.text(
@@ -20,12 +44,12 @@ const reportTableTemplate = (document) => {
 		document.fontSize(10).restore();
 	};
 
-	const setMainTitle = (title) => {
-		document.fontSize(14).text(
-			title,
-			// document.page.margins.left + 100,
-			// document.page.margins.top
-		);
+	const setMainTitle = (title, hasEnterpriseLogo) => {
+		const xPosition = document.page.margins.left + (hasEnterpriseLogo ? LOGO_WIDTH : 0);
+		document
+			.font(getFont("Inter").bold)
+			.fontSize(14)
+			.text(title, xPosition, document.page.margins.top);
 	};
 
 	const calculateColumnXPositions = (columnWidths = []) => {
@@ -43,7 +67,7 @@ const reportTableTemplate = (document) => {
 	};
 
 	const addTableHeader = ({ headers = [], columnX = [], yPosition = 0 }) => {
-		document.fontSize(10);
+		document.font(getFont("Inter").bold).fontSize(10);
 
 		for (let i = 0; i < headers.length; i++) {
 			const label = headers[i].text || "";
@@ -51,6 +75,8 @@ const reportTableTemplate = (document) => {
 
 			document.text(label, xPosition, yPosition);
 		}
+
+		document.font(getFont("Inter").regular);
 	};
 
 	const addHorizontalLine = ({ startXPosition, yPosition, endXPosition }) => {
@@ -94,6 +120,7 @@ const reportTableTemplate = (document) => {
  * @property {string} userName
  * @property {Date} issueDate
  * @property {string} filterBy
+ * @property {string} enterpriseName
  */
 
 /**
@@ -120,7 +147,6 @@ export const reportTable =
 	({ dataSource, mainTitle = "REPORT EXAMPLE", header = {}, table = {} }) =>
 	/**@param {typeof import('pdfkit')} document */
 	(document) => {
-		const { userName = "Sin Nombre" } = header;
 		const { columnWidths = [], headers = [], body = () => [] } = table;
 
 		const {
@@ -135,8 +161,8 @@ export const reportTable =
 
 		let pageNumber = 1;
 
-		setMainTitle(mainTitle);
-		buildHeader({ userName });
+		setMainTitle(mainTitle, !!header.enterpriseLogo);
+		buildHeader(header);
 
 		doc.moveDown(2);
 

@@ -4,6 +4,17 @@ import { reportTable } from "../../core/pdf/report-table.js";
 import { getEventValues } from "./common/event-report-common.js";
 import { eventReportStream } from "./event-report-stream.js";
 
+/**
+ * @param {object} request
+ * @param {import('axios')} request.axios
+ * @param {import('express').Response} request.res
+ * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{name:string, host:string}} request.databaseConfig
+ * @param {{sortBy: string, descending: string}} request.paginationParams
+ * @param {Record<string, unknown>} request.reportFilters
+ * @param {{name:string, color:string, image:string}} request.enterpriseData
+ * @param {string} request.filterByLabel
+ */
 export const eventReport = async ({
 	axios,
 	res,
@@ -11,6 +22,8 @@ export const eventReport = async ({
 	databaseConfig,
 	paginationParams,
 	reportFilters,
+	enterpriseData,
+	filterByLabel,
 }) => {
 	const dataSource = () =>
 		eventReportStream({
@@ -26,12 +39,18 @@ export const eventReport = async ({
 		res,
 		disposition: reportParams.disposition,
 		fileName: reportParams.fileName,
+		fonts: ["Inter"],
 	});
 
 	const build = reportTable({
 		dataSource,
 		mainTitle: "REPORTE DE EVENTOS",
-		header: { userName: "Usuario de Prueba" },
+		header: {
+			userName: "Usuario de Prueba",
+			filterBy: filterByLabel,
+			enterpriseName: enterpriseData.name,
+			enterpriseLogo: enterpriseData.image,
+		},
 		table: {
 			columnWidths: [30, 80, 80, 100, 96, 100],
 			headers: [

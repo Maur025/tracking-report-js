@@ -13,4 +13,6 @@ export const eventReportQueryParam = object({
 	geofenceId: string().nonempty().optional(),
 	type: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
 	deventId: string().nonempty().optional(),
+
+	filterByLabel: string().nonempty().optional(),
 });
