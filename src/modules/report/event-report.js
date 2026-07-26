@@ -1,40 +1,81 @@
 import { getFormatDate } from "../../core/common/get-format-date.js";
-import { reportTableTemplate } from "../../core/pdf/report-table-template.js";
+import { initDocument } from "../../core/pdf/generate-pdf.js";
+import { reportTable } from "../../core/pdf/report-table.js";
 import { getEventValues } from "./common/event-report-common.js";
+import { eventReportStream } from "./event-report-stream.js";
 
-export const eventReport = async ({ res, reportData }) =>
-	reportTableTemplate({
+/**
+ * @param {object} request
+ * @param {import('axios')} request.axios
+ * @param {import('express').Response} request.res
+ * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{name:string, host:string}} request.databaseConfig
+ * @param {{sortBy: string, descending: string}} request.paginationParams
+ * @param {Record<string, unknown>} request.reportFilters
+ * @param {{name:string, color:string, image:string}} request.enterpriseData
+ * @param {string} request.filterByLabel
+ */
+export const eventReport = async ({
+	axios,
+	res,
+	reportParams,
+	databaseConfig,
+	paginationParams,
+	reportFilters,
+	enterpriseData,
+	filterByLabel,
+}) => {
+	const dataSource = () =>
+		eventReportStream({
+			axios,
+			database: databaseConfig,
+			pagination: paginationParams,
+			filters: reportFilters,
+		});
+
+	const document = initDocument({
+		pageSize: "LETTER",
+		pageMargins: { top: 2, bottom: 1, left: 2.5, right: 1, unit: "cm" },
 		res,
+		disposition: reportParams.disposition,
+		fileName: reportParams.fileName,
+		fonts: ["Inter"],
+	});
+
+	const build = reportTable({
+		dataSource,
+		mainTitle: "REPORTE DE EVENTOS",
+		header: {
+			userName: "Usuario de Prueba",
+			filterBy: filterByLabel,
+			enterpriseName: enterpriseData.name,
+			enterpriseLogo: enterpriseData.image,
+		},
 		table: {
-			columnWidths: [20, 80, 80, 100, 96, 100],
-			columns: [
-				{ text: "Nro", style: "tableHeader" },
-				{ text: "Fecha", style: "tableHeader" },
-				{ text: "Tipo", style: "tableHeader" },
-				{ text: "Regla", style: "tableHeader" },
-				{ text: "Vehículo", style: "tableHeader" },
-				{ text: "Evento", style: "tableHeader" },
+			columnWidths: [30, 80, 80, 100, 96, 100],
+			headers: [
+				{ text: "Nro", fontSize: 10 },
+				{ text: "Fecha", fontSize: 10 },
+				{ text: "Tipo", fontSize: 10 },
+				{ text: "Regla", fontSize: 10 },
+				{ text: "Vehículo", fontSize: 10 },
+				{ text: "Evento", fontSize: 10 },
 			],
-			rowData: reportData.map((item, index) => {
+			body: (item, index) => {
 				const { eventName, eventDetail } = getEventValues(item);
+				const formattedDate = getFormatDate({ date: new Date(item.date) });
 
 				return [
-					{ text: index + 1, style: "textTdTableLeft" },
-					{
-						text: getFormatDate({ date: new Date(item.date) }),
-						style: "textTdTableLeft",
-					},
-					{ text: eventName, style: "textTdTableLeft" },
-					{ text: item.rule, style: "textTdTableLeft" },
-					{ text: item.vehicles, style: "textTdTableLeft" },
-					{ text: eventDetail, style: "textTdTableLeft" },
+					{ text: index, fontSize: 9 },
+					{ text: formattedDate, fontSize: 9 },
+					{ text: eventName, fontSize: 9 },
+					{ text: item.rule, fontSize: 9 },
+					{ text: item.vehicles, fontSize: 9 },
+					{ text: eventDetail, fontSize: 9 },
 				];
-			}),
-		},
-		header: {
-			mainTitle: "REPORTE DE EVENTOS",
-			userName: "Usuario de Prueba",
-			issueDate: new Date(),
-			filterBy: null,
+			},
 		},
 	});
+
+	build(document);
+};

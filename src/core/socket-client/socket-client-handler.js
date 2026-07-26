@@ -4,10 +4,16 @@ import { Scheduler } from "./scheduler.cjs";
 /**
  *
  * @param {object} request
- * @param {import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository} request.enterpriseConfigDbRepository
+ * @param {ReturnType<typeof import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
+ * @param {ReturnType<typeof import('../../modules/enterprise/enterprise.repository.js').enterpriseRepository>} request.enterpriseRepository
  */
-export const socketClientHandler = async ({ environment, enterpriseConfigDbRepository }) => {
+export const socketClientHandler = async ({
+	environment,
+	enterpriseConfigDbRepository,
+	enterpriseRepository,
+}) => {
 	const { saveBulk } = enterpriseConfigDbRepository;
+	const { saveBulk: saveBulkEnterprise } = enterpriseRepository;
 
 	const scheduler = new Scheduler();
 
@@ -47,48 +53,66 @@ export const socketClientHandler = async ({ environment, enterpriseConfigDbRepos
 		wsClientGateway.wsClientManager.on("enterprises", async (socket, uuid, _enterprises) => {
 			console.log("wsClientGateway.wsClientManager enterprises", _enterprises);
 
+			const enterprisesConfigToSave = [];
 			const enterprisesToSave = [];
 
 			for (const enterprise of _enterprises) {
 				const port = enterprise.database?.server.apiPort
 					? String(enterprise.database?.server.apiPort)
 					: null;
+				const { id: enterpriseId, name, description, color, image } = enterprise;
+
+				if (!enterpriseId || !name) {
+					continue;
+				}
 
 				const enterpriseData = {
+					id: enterpriseId,
+					name,
+					description: description || null,
+					color: color || null,
+					image: image || null,
+				};
+
+				enterprisesToSave.push(enterpriseData);
+
+				const enterpriseConfigData = {
 					host: enterprise.database?.server?.address || null,
 					port: port,
 					database: enterprise.database?.codename || null,
 					referenceId: enterprise.database?.id || null,
-					enterpriseRefId: enterprise.id || null,
+					enterpriseRefId: enterpriseId || null,
 				};
 
 				if (
-					!enterpriseData.host ||
-					!enterpriseData.port ||
-					!enterpriseData.database ||
-					!enterpriseData.referenceId ||
-					!enterpriseData.enterpriseRefId
+					!enterpriseConfigData.host ||
+					!enterpriseConfigData.port ||
+					!enterpriseConfigData.database ||
+					!enterpriseConfigData.referenceId ||
+					!enterpriseConfigData.enterpriseRefId
 				) {
 					continue;
 				}
 
-				enterprisesToSave.push(enterpriseData);
+				enterprisesConfigToSave.push(enterpriseConfigData);
 			}
 
-			await saveBulk(enterprisesToSave, {
+			await saveBulkEnterprise(enterprisesToSave);
+
+			await saveBulk(enterprisesConfigToSave, {
 				setTarget: (table) => [table.database, table.referenceId, table.enterpriseRefId],
 			});
 
 			//enterprises = _enterprises;
 			//wsClientGateway.wsClientManager.socket.emit("processor.all",backends);
 		});
-		wsClientGateway.on("devices.subscribe", (subscriptions) => {
-			console.log("wsClientGateway.subscriptions", subscriptions);
-		});
-		wsClientGateway.on("devices.unsubscribe.all", (subscriptions) => {
-			console.log("wsClientGateway.devices.unsubscribe.all", subscriptions);
-			wsClientGateway.wsClientManager.socket.emit("processor.all", subscriptions);
-		});
+		// wsClientGateway.on("devices.subscribe", (subscriptions) => {
+		// 	console.log("wsClientGateway.subscriptions", subscriptions);
+		// });
+		// wsClientGateway.on("devices.unsubscribe.all", (subscriptions) => {
+		// 	console.log("wsClientGateway.devices.unsubscribe.all", subscriptions);
+		// 	wsClientGateway.wsClientManager.socket.emit("processor.all", subscriptions);
+		// });
 	};
 
 	return {

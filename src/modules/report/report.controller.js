@@ -1,104 +1,100 @@
-import { getFormatDate } from "../../core/common/get-format-date.js";
-import { buildDocument, initDocument } from "../../core/pdf/generate-pdf.js";
-import { reportTable } from "../../core/pdf/report-table.js";
-import { getEventValues } from "./common/event-report-common.js";
-import { eventReportStream } from "./event-report-stream.js";
+import { eventReportQueryParam } from "./dto/event-report-query-param.js";
+import { eventReport } from "./event-report.js";
 
 export class ReportController {
 	#resource = "reports";
 	#axios;
+	#getDatabaseConfig;
 
 	/**
 	 * @param {object} request
 	 * @param {import('axios')} request.axios
+	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.getDatabaseConfig
 	 */
-	constructor({ axios }) {
+	constructor({ axios, getDatabaseConfig }) {
 		this.#axios = axios;
+		this.#getDatabaseConfig = getDatabaseConfig;
 	}
 
 	/** @param {import('express').Application} app*/
 	registerRoutes(app, basePath) {
-		app.get(`${basePath}/${this.#resource}`, (req, res) => this.#handleDefaultGet(req, res));
+		app.get(`${basePath}/${this.#resource}/events`, (req, res) =>
+			this.#handleEventGet(req, res),
+		);
 	}
 
 	/**
 	 * @param {import('express').Request} req
 	 * @param {import('express').Response} res
 	 */
-	async #handleDefaultGet(req, res) {
+	async #handleEventGet(req, res) {
+		const validQueryParams = eventReportQueryParam.parse(req.query);
+
+		if (
+			validQueryParams.format &&
+			!["json", "excel", "pdf"].includes(validQueryParams.format)
+		) {
+			return res.status(400).json({ error: "Invalid format parameter" });
+		}
+
+		const { getConfig } = this.#getDatabaseConfig;
+
+		const dbConfig = await getConfig({
+			databaseName: validQueryParams.databaseName,
+		});
+
+		if (!validQueryParams.format || validQueryParams.format === "json") {
+			// return json with data requested
+			return res.status(200).json({ message: "JSON format not implemented yet" });
+		}
+
+		if (validQueryParams.format === "excel") {
+			// return excel file with data requested
+			return;
+		}
+
+		await this.#handleEventReportPdf({ validQueryParams, res, dbConfig });
+	}
+
+	/**
+	 * @param {object} request
+	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
+	 * @param {import('express').Response} request.res
+	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 */
+	async #handleEventReportPdf({ validQueryParams, res, dbConfig }) {
+		const { host, enterprise } = dbConfig;
 		const {
-			sortBy = "date",
-			descending = true,
-			disposition = "inline",
-			fileName = "example",
-		} = req.query;
+			sortBy,
+			descending,
+			disposition,
+			fileName,
+			databaseName,
+			vehicleId,
+			ruleId,
+			inout,
+			geofenceId,
+			type,
+			deventId,
+			filterByLabel,
+		} = validQueryParams;
 
-		const dataSource = () =>
-			eventReportStream({
-				axios: this.#axios,
-				database: {
-					name: "trackingdb",
-					host: "http://172.20.1.5:9999",
-				},
-				pagination: { sortBy, descending },
-			});
-
-		// const eventData = await eventReportGetData({
-		// 	axios: this.#axios,
-		// 	dbHost: "http://172.20.1.5:9999",
-		// 	dbName: "trackingdb",
-		// 	pagination: {
-		// 		page: Number(page),
-		// 		size: Number(size),
-		// 		sortBy,
-		// 		descending: Boolean(descending),
-		// 	},
-		// });
-
-		const builder = buildDocument(
-			reportTable({
-				dataSource,
-				mainTitle: "REPORTE DE EVENTOS",
-				header: { userName: "Usuario de Prueba" },
-				table: {
-					columnWidths: [20, 80, 80, 100, 96, 100],
-					headers: [
-						{ text: "Nro", fontSize: 10 },
-						{ text: "Fecha", fontSize: 10 },
-						{ text: "Tipo", fontSize: 10 },
-						{ text: "Regla", fontSize: 10 },
-						{ text: "Vehículo", fontSize: 10 },
-						{ text: "Evento", fontSize: 10 },
-					],
-					body: (item, index) => {
-						const { eventName, eventDetail } = getEventValues(item);
-						const formattedDate = getFormatDate({ date: new Date(item.date) });
-
-						return [
-							{ text: index, fontSize: 9 },
-							{ text: formattedDate, fontSize: 9 },
-							{ text: eventName, fontSize: 9 },
-							{ text: item.rule, fontSize: 9 },
-							{ text: item.vehicles, fontSize: 9 },
-							{ text: eventDetail, fontSize: 9 },
-						];
-					},
-				},
-			}),
-		);
-
-		const document = builder(
-			initDocument({
-				pageSize: "LETTER",
-				pageMargins: { top: 2, bottom: 1, left: 2.5, right: 1, unit: "cm" },
-				res,
-				disposition,
-				fileName,
-			}),
-		);
-
-		console.log(document);
-
-		// await eventReport({ res, reportData: eventData });
+		await eventReport({
+			axios: this.#axios,
+			res,
+			enterpriseData: enterprise,
+			reportParams: { disposition, fileName },
+			databaseConfig: { name: databaseName, host },
+			paginationParams: { sortBy, descending },
+			reportFilters: {
+				vehicleId,
+				ruleId,
+				inout,
+				geofenceId,
+				type,
+				deventId,
+			},
+			filterByLabel,
+		});
 	}
 }

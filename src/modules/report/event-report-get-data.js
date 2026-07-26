@@ -14,11 +14,14 @@ export const eventReportGetData = async ({
 }) => {
 	const response = await axios.get(`${dbHost}/${dbName}/registry_events/eventnotification`, {
 		params: {
-			...filters,
+			...transformFilters(filters),
 			page: pagination.page,
 			size: pagination.size,
 			sortBy: pagination.sortBy,
 			descending: pagination.descending,
+		},
+		paramsSerializer: {
+			indexes: null,
 		},
 	});
 
@@ -29,6 +32,48 @@ export const eventReportGetData = async ({
 	}
 
 	return mapResponseToReportData(response.data?.content);
+};
+
+const transformFilters = (filters) => {
+	const transformedFilters = {};
+	for (const [key, value] of Object.entries(filters)) {
+		if (!value) {
+			continue;
+		}
+
+		switch (key) {
+			case "vehicleId":
+				transformedFilters["[vehicle_id][equal]"] = value;
+				break;
+			case "ruleId": {
+				transformedFilters["[rule_id][equal]"] = value;
+				break;
+			}
+			case "inout": {
+				transformedFilters["[inout][equal]"] = value;
+				break;
+			}
+			case "geofenceId": {
+				transformedFilters["[geofence_id][equal]"] = value;
+				break;
+			}
+			case "type": {
+				transformedFilters["[type_name][equal]"] = value;
+				break;
+			}
+			case "deventId": {
+				transformedFilters["[devent_id][equal]"] = value;
+				break;
+			}
+			default:
+				transformedFilters[key] = value;
+				break;
+		}
+	}
+
+	console.log(transformedFilters);
+
+	return transformedFilters;
 };
 
 const mapResponseToReportData = (data) =>
