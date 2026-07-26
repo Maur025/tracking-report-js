@@ -15,4 +15,5 @@ export const eventReportQueryParam = object({
 	deventId: string().nonempty().optional(),
 
 	filterByLabel: string().nonempty().optional(),
+	format: string().nonempty().optional(),
 });
