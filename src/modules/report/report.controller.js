@@ -1,3 +1,4 @@
+import { excelExample } from "../../core/excel/excel-example.js";
 import { eventReportQueryParam } from "./dto/event-report-query-param.js";
 import { eventReport } from "./event-report.js";
 
@@ -49,11 +50,19 @@ export class ReportController {
 		}
 
 		if (validQueryParams.format === "excel") {
-			// return excel file with data requested
+			await this.#handleEventReportExcel({
+				validQueryParams,
+				res,
+				dbConfig,
+			});
 			return;
 		}
 
-		await this.#handleEventReportPdf({ validQueryParams, res, dbConfig });
+		await this.#handleEventReportPdf({
+			validQueryParams,
+			res,
+			dbConfig,
+		});
 	}
 
 	/**
@@ -96,5 +105,15 @@ export class ReportController {
 			},
 			filterByLabel,
 		});
+	}
+
+	/**
+	 * @param {object} request
+	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
+	 * @param {import('express').Response} request.res
+	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 */
+	async #handleEventReportExcel({ validQueryParams, res, dbConfig }) {
+		await excelExample({ res });
 	}
 }
