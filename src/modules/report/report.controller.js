@@ -1,6 +1,6 @@
-import { excelExample } from "../../core/excel/excel-example.js";
 import { eventReportQueryParam } from "./dto/event-report-query-param.js";
-import { eventReport } from "./event-report.js";
+import { eventExcelReport } from "./event-excel-report.js";
+import { eventPdfReport } from "./event-pdf-report.js";
 
 export class ReportController {
 	#resource = "reports";
@@ -88,7 +88,7 @@ export class ReportController {
 			filterByLabel,
 		} = validQueryParams;
 
-		await eventReport({
+		await eventPdfReport({
 			axios: this.#axios,
 			res,
 			enterpriseData: enterprise,
@@ -114,6 +114,28 @@ export class ReportController {
 	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.dbConfig
 	 */
 	async #handleEventReportExcel({ validQueryParams, res, dbConfig }) {
-		await excelExample({ res });
+		await eventExcelReport({
+			axios: this.#axios,
+			res,
+			reportParams: {
+				disposition: validQueryParams.disposition,
+				fileName: validQueryParams.fileName,
+			},
+			databaseConfig: { name: validQueryParams.databaseName, host: dbConfig.host },
+			paginationParams: {
+				sortBy: validQueryParams.sortBy,
+				descending: validQueryParams.descending,
+			},
+			reportFilters: {
+				vehicleId: validQueryParams.vehicleId,
+				ruleId: validQueryParams.ruleId,
+				inout: validQueryParams.inout,
+				geofenceId: validQueryParams.geofenceId,
+				type: validQueryParams.type,
+				deventId: validQueryParams.deventId,
+			},
+			enterpriseData: dbConfig.enterprise,
+			filterByLabel: validQueryParams.filterByLabel,
+		});
 	}
 }

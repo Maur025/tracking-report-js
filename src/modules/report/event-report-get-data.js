@@ -71,8 +71,6 @@ const transformFilters = (filters) => {
 		}
 	}
 
-	console.log(transformedFilters);
-
 	return transformedFilters;
 };
 

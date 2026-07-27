@@ -15,7 +15,7 @@ import { eventReportStream } from "./event-report-stream.js";
  * @param {{name:string, color:string, image:string}} request.enterpriseData
  * @param {string} request.filterByLabel
  */
-export const eventReport = async ({
+export const eventPdfReport = async ({
 	axios,
 	res,
 	reportParams,
