@@ -72,3 +72,64 @@ export const excelExample = async ({ res }) => {
 	await worksheet.commit();
 	await workbook.commit();
 };
+
+// Option focus in simplicity, but hard to extend and require magic implementation to be completely functional
+/*
+of "sum" 
+
+case "sum between 2 numbers"
+| a | b| result|
+---------------
+| 5 | 5 |  10  |
+
+*/
+
+// Option with focus, case, input, output ... simple and easy to understand, but hard to extend
+/*
+of "sum" 
+
+case "sum between 2 numbers" input 5,5 output 10
+
+case "sum between 2 numbers, one negative" input 5,-5 output 0
+
+*/
+
+// Option with focus give, when, then as main key values
+/*
+test "sum"
+
+case "sum between 2 numbers"
+given 5,5
+when sum(5,5)
+then 10
+*/
+
+// Beta version to use, could change in the future, but for now is the best option to use
+/*
+# Test: Payment process
+
+## Setup & Mocks
+* **Mock** `PaymentGateway.charge()` -> `returns {success: true, id: 'pay_123'}`
+* **DB** `Users` -> `seed {id:1, balance: 100}`
+
+---
+
+## Case: Successful Payment
+* **When** POST `/api/v1/checkout`
+	* Body: `{ userId: 1, amount:50 }`
+* **Then** Status `200`
+	* Body.status == `"PAID"`
+	* BD `Users(1).balance` == `50`
+*/
+
+// same example with beta option to development
+/*
+# Test: Sum of numbers
+
+---
+
+## Case: sum between 2 numbers
+* **Given** number1 {5} and number2 {5}
+* **When** sum(number1, number2)
+* **Then** result == {10}
+*/
