@@ -1,27 +1,29 @@
+import { Temporal } from "@js-temporal/polyfill";
 import { eventReportQueryParam } from "./dto/event-report-query-param.js";
 import { eventExcelReport } from "./event-excel-report.js";
 import { eventPdfReport } from "./event-pdf-report.js";
 
-export class ReportController {
-	#resource = "reports";
+export class EventReportController {
+	#resource = "reports/events";
+
 	#axios;
 	#getDatabaseConfig;
 
 	/**
-	 * @param {object} request
-	 * @param {import('axios')} request.axios
-	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.getDatabaseConfig
+	 * @param {{
+	 * axios: import("axios");
+	 * getDatabaseConfig: ReturnType<typeof import("../../core/common/action/get-database-config.js").getDatabaseConfig>;
+	 * }} request
 	 */
 	constructor({ axios, getDatabaseConfig }) {
 		this.#axios = axios;
 		this.#getDatabaseConfig = getDatabaseConfig;
 	}
 
-	/** @param {import('express').Application} app*/
 	registerRoutes(app, basePath) {
-		app.get(`${basePath}/${this.#resource}/events`, (req, res) =>
-			this.#handleEventGet(req, res),
-		);
+		const path = `${basePath}/${this.#resource}`;
+
+		app.get(path, (req, res) => this.#handleEventGet(req, res));
 	}
 
 	/**
@@ -30,6 +32,28 @@ export class ReportController {
 	 */
 	async #handleEventGet(req, res) {
 		const validQueryParams = eventReportQueryParam.parse(req.query);
+
+		console.log({ inputDate: validQueryParams.date });
+
+		const dateNow = Temporal.Now.zonedDateTimeISO("America/La_Paz");
+
+		const dateTest = Temporal.Now.zonedDateTimeISO("UTC");
+		const startDay = dateTest.with({
+			hour: 0,
+			minute: 0,
+			second: 0,
+			millisecond: 0,
+			microsecond: 0,
+			nanosecond: 0,
+		});
+
+		const endDay = startDay.add({ days: 1 }).subtract({ nanoseconds: 1 });
+
+		console.log({
+			startDay: startDay.toInstant().toString(),
+			endDay: endDay.toInstant().toString(),
+			dateNow: dateNow.toInstant().toString(),
+		});
 
 		if (
 			validQueryParams.format &&
@@ -69,7 +93,7 @@ export class ReportController {
 	 * @param {object} request
 	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
 	 * @param {import('express').Response} request.res
-	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 * @param {ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>} request.dbConfig
 	 */
 	async #handleEventReportPdf({ validQueryParams, res, dbConfig }) {
 		const { host, enterprise } = dbConfig;
@@ -111,7 +135,7 @@ export class ReportController {
 	 * @param {object} request
 	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
 	 * @param {import('express').Response} request.res
-	 * @param {ReturnType<typeof import('./common/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 * @param {ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>} request.dbConfig
 	 */
 	async #handleEventReportExcel({ validQueryParams, res, dbConfig }) {
 		await eventExcelReport({

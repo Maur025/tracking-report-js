@@ -2,7 +2,7 @@
  *
  * @param {object} request
  * @param {string} request.databaseName
- * @param {ReturnType<typeof import('../../enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
+ * @param {ReturnType<typeof import('../../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
  */
 export const getDatabaseConfig = ({ enterpriseConfigDbRepository }) => {
 	const { findByDatabase } = enterpriseConfigDbRepository;

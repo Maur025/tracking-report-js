@@ -2,22 +2,33 @@ import { asClass, asFunction, asValue, createContainer, InjectionMode, listModul
 import express from "express";
 import { environment } from "../environment.js";
 import { ServerApp } from "../../core/server-app.js";
-import { ReportController } from "../../modules/report/report.controller.js";
 import { ErrorHandler } from "../../core/error-handler.js";
 import { ContainerAdapter } from "./container-adapter.js";
 import { enterpriseConfigDbRepository } from "../../modules/enterprise/enterprise-config-db.repository.js";
 import axios from "axios";
-import { getDatabaseConfig } from "../../modules/report/common/get-database-config.js";
+import { getDatabaseConfig } from "../../core/common/action/get-database-config.js";
 import { enterpriseRepository } from "../../modules/enterprise/enterprise.repository.js";
 import { socketClientHandler } from "../../core/socket-client/socket-client-handler.js";
+import { EventReportController } from "../../modules/event/event-report.controller.js";
 
 const iocContainer = createContainer({
 	injectionMode: InjectionMode.PROXY,
 	strict: true,
 });
 
+/** @param {string} name */
+const getModuleName = (name) => {
+	const parts = name
+		.split("-")
+		.map((part, index) => (index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)));
+
+	const text = parts.join("");
+
+	return text.replace(".controller", "Controller");
+};
+
 const controllerModules = listModules("**/*.controller.js").map((module) => {
-	return { ...module, name: module.name.replace(".controller", "Controller") };
+	return { ...module, name: getModuleName(module.name) };
 });
 
 iocContainer.register({
@@ -35,7 +46,7 @@ iocContainer.register({
 	errorHandler: asClass(ErrorHandler).singleton(),
 
 	// app
-	reportController: asClass(ReportController).singleton(),
+	eventReportController: asClass(EventReportController).singleton(),
 
 	controllers: asFunction(() =>
 		controllerModules.map((module) => iocContainer.resolve(module.name)),

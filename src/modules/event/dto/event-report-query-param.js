@@ -16,4 +16,6 @@ export const eventReportQueryParam = object({
 
 	filterByLabel: string().nonempty().optional(),
 	format: string().nonempty().optional(),
+	date: string().nonempty().optional(),
+	zoneId: string().nonempty().optional(),
 });
