@@ -12,9 +12,11 @@ export const eventReportGetData = async ({
 	},
 	filters = {},
 }) => {
+	const transformedFilters = transformFilters(filters);
+
 	const response = await axios.get(`${dbHost}/${dbName}/registry_events/eventnotification`, {
 		params: {
-			...transformFilters(filters),
+			...transformedFilters,
 			page: pagination.page,
 			size: pagination.size,
 			sortBy: pagination.sortBy,
@@ -31,7 +33,10 @@ export const eventReportGetData = async ({
 		);
 	}
 
-	return mapResponseToReportData(response.data?.content);
+	return {
+		data: mapResponseToReportData(response.data?.content),
+		pagination: response.data?.pagination ?? null,
+	};
 };
 
 const transformFilters = (filters) => {
@@ -65,6 +70,14 @@ const transformFilters = (filters) => {
 				transformedFilters["[devent_id][equal]"] = value;
 				break;
 			}
+			case "fromDate": {
+				transformedFilters["[date][between][from]"] = value;
+				break;
+			}
+			case "toDate": {
+				transformedFilters["[date][between][to]"] = value;
+				break;
+			}
 			default:
 				transformedFilters[key] = value;
 				break;
@@ -76,7 +89,7 @@ const transformFilters = (filters) => {
 
 const mapResponseToReportData = (data) =>
 	data?.map((item) => ({
-		vehicles: item.vehicle.map((v) => `${v.name} (${v.type})`).join(", "),
+		vehicles: item.vehicle.map((v) => v.name).join(", "),
 		vehicleOtherData: getObjectOfString(item.vehicle?.metadata),
 		geofence: item.geofence?.name,
 		rule: item.rule?.name,

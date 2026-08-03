@@ -2,11 +2,12 @@
  *
  * @param {object} request
  * @param {string} request.databaseName
- * @param {ReturnType<typeof import('../../enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
+ * @param {ReturnType<typeof import('../../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
  */
 export const getDatabaseConfig = ({ enterpriseConfigDbRepository }) => {
 	const { findByDatabase } = enterpriseConfigDbRepository;
 
+	/** @param {{databaseName: string}} request */
 	const getConfig = async ({ databaseName }) => {
 		if (!databaseName) {
 			throw new Error("Database name is required");
@@ -23,6 +24,7 @@ export const getDatabaseConfig = ({ enterpriseConfigDbRepository }) => {
 		}
 
 		return {
+			name: databaseName,
 			host: `http://${databaseConfig.host}:${databaseConfig.port}`,
 			enterprise: {
 				name: databaseConfig.enterprise?.name || null,
