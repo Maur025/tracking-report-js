@@ -44,7 +44,7 @@ export const eventPdfReport = async ({
 
 	const build = reportTable({
 		dataSource,
-		mainTitle: "REPORTE DE EVENTOS",
+		mainTitle: "EVENTOS REGISTRADOS",
 		header: {
 			userName: "Usuario de Prueba",
 			filterBy: filterByLabel,
@@ -52,26 +52,26 @@ export const eventPdfReport = async ({
 			enterpriseLogo: enterpriseData.image,
 		},
 		table: {
-			columnWidths: [30, 80, 80, 100, 96, 100],
+			columnWidths: [30, 90, 70, 110, 80, 110],
 			headers: [
-				{ text: "Nro", fontSize: 10 },
-				{ text: "Fecha", fontSize: 10 },
-				{ text: "Tipo", fontSize: 10 },
-				{ text: "Regla", fontSize: 10 },
-				{ text: "Vehículo", fontSize: 10 },
-				{ text: "Evento", fontSize: 10 },
+				{ text: "Nro", fontSize: 9 },
+				{ text: "Fecha", fontSize: 9 },
+				{ text: "Tipo", fontSize: 9 },
+				{ text: "Regla", fontSize: 9 },
+				{ text: "Vehículo", fontSize: 9 },
+				{ text: "Evento", fontSize: 9 },
 			],
 			body: (item, index) => {
 				const { eventName, eventDetail } = getEventValues(item);
 				const formattedDate = getFormatDate({ date: new Date(item.date) });
 
 				return [
-					{ text: index, fontSize: 9 },
-					{ text: formattedDate, fontSize: 9 },
-					{ text: eventName, fontSize: 9 },
-					{ text: item.rule, fontSize: 9 },
-					{ text: item.vehicles, fontSize: 9 },
-					{ text: eventDetail, fontSize: 9 },
+					{ text: index, fontSize: 8 },
+					{ text: formattedDate, fontSize: 8 },
+					{ text: eventName, fontSize: 8 },
+					{ text: item.rule, fontSize: 8 },
+					{ text: item.vehicles, fontSize: 8 },
+					{ text: eventDetail, fontSize: 8 },
 				];
 			},
 		},

@@ -20,9 +20,8 @@ export const registryProgressQueryParam = dateFilterRequestSchema.extend({
 	fileName: string().optional().default("example"),
 
 	type: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
-	vehicle: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
-	progress: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
-	routes: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
+	vehicleId: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
+	progressId: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
 
 	filterByLabel: string().nonempty().optional(),
 	format: string().nonempty().optional(),

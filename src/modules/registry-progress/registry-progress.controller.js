@@ -6,32 +6,6 @@ import { dateFilterProcess } from "../../core/common/date-filter-process.js";
 import { registryProgressReportGetData } from "./registry-progress-get-data.js";
 import { serverResponse } from "../../core/server-response.js";
 
-const normalizeSortBy = (sortBy) => (sortBy === "data" ? "date_from" : sortBy);
-
-/**
- * @param {Record<string, any>} item
- */
-const normalizeRegistryProgressItem = (item) => ({
-	...item,
-	type: item?.type,
-	vehicle: Array.isArray(item?.vehicle)
-		? item.vehicle.map((vehicle) => vehicle?.name).filter(Boolean)
-		: item?.vehicle,
-	progress: item?.progress
-		? {
-				name: item.progress.name,
-				frequency_type: item.progress.frequency_type,
-			}
-		: item?.progress,
-	routes: Array.isArray(item?.routes)
-		? item.routes.map((route) => ({
-				completed: route?.completed,
-			}))
-		: item?.routes,
-	date_from: item?.date_from,
-	date_to: item?.date_to,
-});
-
 export class RegistryProgressController {
 	#resource = "reports/registry-progress";
 
@@ -72,7 +46,6 @@ export class RegistryProgressController {
 			type: validQueryParams.type,
 			vehicle: validQueryParams.vehicle,
 			progress: validQueryParams.progress,
-			routes: validQueryParams.routes,
 			...dateFilters,
 		};
 
@@ -91,11 +64,9 @@ export class RegistryProgressController {
 			databaseName: validQueryParams.databaseName,
 		});
 
-		const normalizedSortBy = normalizeSortBy(validQueryParams.sortBy);
-
 		if (!validQueryParams.format || validQueryParams.format === "json") {
 			return this.#handleRegistryProgressJson({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -104,7 +75,7 @@ export class RegistryProgressController {
 
 		if (validQueryParams.format === "excel") {
 			await this.#handleRegistryProgressExcel({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -113,7 +84,7 @@ export class RegistryProgressController {
 		}
 
 		await this.#handleRegistryProgressPdf({
-			validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+			validQueryParams,
 			res,
 			dbConfig,
 			reportFilters,
@@ -144,7 +115,7 @@ export class RegistryProgressController {
 
 		return res.status(HttpStatusCode.Ok).json(
 			serverResponse({
-				data: registryProgressData.data.map(normalizeRegistryProgressItem),
+				data: registryProgressData.data,
 				code: HttpStatusCode.Ok,
 				pagination: registryProgressData.pagination,
 			}),

@@ -1,6 +1,5 @@
 import { logger } from "../../core/common/logger.js";
 import { registryProgressReportGetData } from "./registry-progress-get-data.js";
-import { normalizeRegistryProgressItem } from "./registry-progress.normalize.js";
 
 /**
  * @param {object} request
@@ -35,7 +34,7 @@ export async function* registryProgressReportStream({ axios, database, paginatio
 			}
 
 			for (const registryProgress of registryProgressList.data) {
-				yield normalizeRegistryProgressItem(registryProgress);
+				yield registryProgress;
 			}
 
 			if (registryProgressList.data?.length < size) {

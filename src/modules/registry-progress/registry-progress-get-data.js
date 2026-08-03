@@ -1,3 +1,5 @@
+import { mapResponseToReportRegistryProgress } from "./map-response-to-report-registry-progress.js";
+
 /**
  * @param {object} request
  * @param {import('axios').AxiosInstance} request.axios
@@ -20,6 +22,8 @@ export const registryProgressReportGetData = async ({
 }) => {
 	const transformedFilters = transformFilters(filters);
 
+	console.log(transformedFilters);
+
 	const response = await axios.get(`${dbHost}/${dbName}/registry_progress`, {
 		params: {
 			...transformedFilters,
@@ -40,7 +44,7 @@ export const registryProgressReportGetData = async ({
 	}
 
 	return {
-		data: response.data?.content ?? response.data?.data ?? [],
+		data: mapResponseToReportRegistryProgress(response.data?.content),
 		pagination: response.data?.pagination ?? null,
 	};
 };
@@ -58,22 +62,19 @@ const transformFilters = (filters) => {
 
 		switch (key) {
 			case "type":
-				transformedFilters.type = value;
+				transformedFilters["[type][equal]"] = value;
 				break;
-			case "vehicle":
-				transformedFilters.vehicle = value;
+			case "vehicleId":
+				transformedFilters["[vehicle_id][equal]"] = value;
 				break;
-			case "progress":
-				transformedFilters.progress = value;
-				break;
-			case "routes":
-				transformedFilters.routes = value;
+			case "progressId":
+				transformedFilters["[progress_id][equal]"] = value;
 				break;
 			case "fromDate":
 				transformedFilters["[date_from][between][from]"] = value;
 				break;
 			case "toDate":
-				transformedFilters["[date_to][between][to]"] = value;
+				transformedFilters["[date_from][between][to]"] = value;
 				break;
 			default:
 				transformedFilters[key] = value;

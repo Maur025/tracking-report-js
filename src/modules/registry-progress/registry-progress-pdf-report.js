@@ -1,6 +1,12 @@
-import { getFormatDate } from "../../core/common/get-format-date.js";
 import { initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
+import {
+	getDate,
+	getItemProgressName,
+	getProgressValue,
+	getTypeProgress,
+	getVehicleName,
+} from "./common/registry-progress-report-common.js";
 import { registryProgressReportStream } from "./registry-progress-stream.js";
 
 /**
@@ -43,7 +49,7 @@ export const registryProgressPdfReport = async ({
 
 	const build = reportTable({
 		dataSource,
-		mainTitle: "REPORTE REGISTRY PROGRESS",
+		mainTitle: "REGISTRO DE PROGRESO",
 		header: {
 			userName: "Usuario de Prueba",
 			filterBy: filterByLabel,
@@ -51,46 +57,28 @@ export const registryProgressPdfReport = async ({
 			enterpriseLogo: enterpriseData.image,
 		},
 		table: {
-			columnWidths: [30, 70, 70, 70, 80, 90, 90],
+			columnWidths: [30, 90, 90, 60, 90, 90, 60],
 			headers: [
-				{ text: "Nro", fontSize: 10 },
-				{ text: "Desde", fontSize: 10 },
-				{ text: "Hasta", fontSize: 10 },
-				{ text: "Tipo", fontSize: 10 },
-				{ text: "Progreso", fontSize: 10 },
-				{ text: "Vehículo", fontSize: 10 },
-				{ text: "Rutas", fontSize: 10 },
+				{ text: "Nro", fontSize: 9 },
+				{ text: "Desde", fontSize: 9 },
+				{ text: "Hasta", fontSize: 9 },
+				{ text: "Tipo", fontSize: 9 },
+				{ text: "Nombre", fontSize: 9 },
+				{ text: "Vehículo", fontSize: 9 },
+				{ text: "Progreso", fontSize: 9 },
 			],
-			body: (item, index) => {
-				const fromDate = item.date_from
-					? getFormatDate({ date: new Date(item.date_from) })
-					: "N/A";
-				const toDate = item.date_to
-					? getFormatDate({ date: new Date(item.date_to) })
-					: "N/A";
-				const typeValue = Array.isArray(item.type)
-					? item.type.join(", ")
-					: (item.type ?? "N/A");
-				const vehicleValue = Array.isArray(item.vehicle)
-					? item.vehicle.join(", ")
-					: (item.vehicle ?? "N/A");
-				const progressValue = item.progress
-					? `${item.progress.name ?? "N/A"} / ${item.progress.frequency_type ?? "N/A"}`
-					: "N/A";
-				const routesValue = Array.isArray(item.routes)
-					? item.routes.map((route) => (route?.completed ? "Sí" : "No")).join(", ")
-					: (item.routes ?? "N/A");
-
-				return [
-					{ text: index, fontSize: 9 },
-					{ text: fromDate, fontSize: 9 },
-					{ text: toDate, fontSize: 9 },
-					{ text: typeValue, fontSize: 9 },
-					{ text: progressValue, fontSize: 9 },
-					{ text: vehicleValue, fontSize: 9 },
-					{ text: routesValue, fontSize: 9 },
-				];
-			},
+			body: (item, index) => [
+				{ text: index, fontSize: 8 },
+				{ text: getDate(item.dateFrom), fontSize: 8 },
+				{ text: getDate(item.dateTo), fontSize: 8 },
+				{ text: getTypeProgress(item.type), fontSize: 8 },
+				{
+					text: getItemProgressName(item.progressName, item.progressFrequencyType),
+					fontSize: 8,
+				},
+				{ text: getVehicleName(item.vehicle), fontSize: 8 },
+				{ text: getProgressValue(item.progressValue), fontSize: 8 },
+			],
 		},
 	});
 
