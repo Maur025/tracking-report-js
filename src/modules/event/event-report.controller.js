@@ -1,7 +1,10 @@
-import { Temporal } from "@js-temporal/polyfill";
 import { eventReportQueryParam } from "./dto/event-report-query-param.js";
 import { eventExcelReport } from "./event-excel-report.js";
 import { eventPdfReport } from "./event-pdf-report.js";
+import { HttpStatusCode } from "axios";
+import { dateFilterProcess } from "../../core/common/date-filter-process.js";
+import { eventReportGetData } from "./event-report-get-data.js";
+import { serverResponse } from "../../core/server-response.js";
 
 export class EventReportController {
 	#resource = "reports/events";
@@ -20,6 +23,10 @@ export class EventReportController {
 		this.#getDatabaseConfig = getDatabaseConfig;
 	}
 
+	/**
+	 * @param {import('express').Application} app
+	 * @param {string} basePath
+	 */
 	registerRoutes(app, basePath) {
 		const path = `${basePath}/${this.#resource}`;
 
@@ -33,33 +40,25 @@ export class EventReportController {
 	async #handleEventGet(req, res) {
 		const validQueryParams = eventReportQueryParam.parse(req.query);
 
-		console.log({ inputDate: validQueryParams.date });
+		const dateFilters = dateFilterProcess({ ...validQueryParams });
 
-		const dateNow = Temporal.Now.zonedDateTimeISO("America/La_Paz");
-
-		const dateTest = Temporal.Now.zonedDateTimeISO("UTC");
-		const startDay = dateTest.with({
-			hour: 0,
-			minute: 0,
-			second: 0,
-			millisecond: 0,
-			microsecond: 0,
-			nanosecond: 0,
-		});
-
-		const endDay = startDay.add({ days: 1 }).subtract({ nanoseconds: 1 });
-
-		console.log({
-			startDay: startDay.toInstant().toString(),
-			endDay: endDay.toInstant().toString(),
-			dateNow: dateNow.toInstant().toString(),
-		});
+		const reportFilters = {
+			vehicleId: validQueryParams.vehicleId,
+			ruleId: validQueryParams.ruleId,
+			inout: validQueryParams.inout,
+			geofenceId: validQueryParams.geofenceId,
+			type: validQueryParams.type,
+			deventId: validQueryParams.deventId,
+			...dateFilters,
+		};
 
 		if (
 			validQueryParams.format &&
 			!["json", "excel", "pdf"].includes(validQueryParams.format)
 		) {
-			return res.status(400).json({ error: "Invalid format parameter" });
+			return res
+				.status(HttpStatusCode.BadRequest)
+				.json({ error: "Invalid format parameter" });
 		}
 
 		const { getConfig } = this.#getDatabaseConfig;
@@ -69,8 +68,12 @@ export class EventReportController {
 		});
 
 		if (!validQueryParams.format || validQueryParams.format === "json") {
-			// return json with data requested
-			return res.status(200).json({ message: "JSON format not implemented yet" });
+			return this.#handleEventReportJson({
+				validQueryParams,
+				res,
+				dbConfig,
+				reportFilters,
+			});
 		}
 
 		if (validQueryParams.format === "excel") {
@@ -78,6 +81,7 @@ export class EventReportController {
 				validQueryParams,
 				res,
 				dbConfig,
+				reportFilters,
 			});
 			return;
 		}
@@ -86,58 +90,77 @@ export class EventReportController {
 			validQueryParams,
 			res,
 			dbConfig,
+			reportFilters,
 		});
 	}
 
 	/**
-	 * @param {object} request
-	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
-	 * @param {import('express').Response} request.res
-	 * @param {ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 * @param {{
+	 *  validQueryParams: ReturnType<typeof eventReportQueryParam.parse>;
+	 *  res: import('express').Response;
+	 *  dbConfig: ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>;
+	 *  reportFilters: object
+	 * }} request
 	 */
-	async #handleEventReportPdf({ validQueryParams, res, dbConfig }) {
-		const { host, enterprise } = dbConfig;
-		const {
-			sortBy,
-			descending,
-			disposition,
-			fileName,
-			databaseName,
-			vehicleId,
-			ruleId,
-			inout,
-			geofenceId,
-			type,
-			deventId,
-			filterByLabel,
-		} = validQueryParams;
+	async #handleEventReportJson({ validQueryParams, res, dbConfig, reportFilters }) {
+		const eventData = await eventReportGetData({
+			axios: this.#axios,
+			dbName: dbConfig.name,
+			dbHost: dbConfig.host,
+			pagination: {
+				page: validQueryParams.page,
+				size: validQueryParams.size,
+				sortBy: validQueryParams.sortBy,
+				descending: validQueryParams.descending,
+			},
+			filters: reportFilters,
+		});
 
+		return res.status(HttpStatusCode.Ok).json(
+			serverResponse({
+				data: eventData.data,
+				code: HttpStatusCode.Ok,
+				pagination: eventData.pagination,
+			}),
+		);
+	}
+
+	/**
+	 * @param {{
+	 *  validQueryParams: ReturnType<typeof eventReportQueryParam.parse>;
+	 *  res: import('express').Response;
+	 *  dbConfig: ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>;
+	 *  reportFilters: object
+	 * }} request
+	 */
+	async #handleEventReportPdf({ validQueryParams, res, dbConfig, reportFilters }) {
 		await eventPdfReport({
 			axios: this.#axios,
 			res,
-			enterpriseData: enterprise,
-			reportParams: { disposition, fileName },
-			databaseConfig: { name: databaseName, host },
-			paginationParams: { sortBy, descending },
-			reportFilters: {
-				vehicleId,
-				ruleId,
-				inout,
-				geofenceId,
-				type,
-				deventId,
+			enterpriseData: dbConfig.enterprise,
+			reportParams: {
+				disposition: validQueryParams.disposition,
+				fileName: validQueryParams.fileName,
 			},
-			filterByLabel,
+			databaseConfig: dbConfig,
+			paginationParams: {
+				sortBy: validQueryParams.sortBy,
+				descending: validQueryParams.descending,
+			},
+			reportFilters,
+			filterByLabel: validQueryParams.filterByLabel,
 		});
 	}
 
 	/**
-	 * @param {object} request
-	 * @param {ReturnType<typeof eventReportQueryParam.parse>} request.validQueryParams
-	 * @param {import('express').Response} request.res
-	 * @param {ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>} request.dbConfig
+	 * @param {{
+	 * 	validQueryParams: ReturnType<typeof eventReportQueryParam.parse>;
+	 * 	res: import('express').Response;
+	 * 	dbConfig: ReturnType<typeof import('../../core/common/action/get-database-config.js').getDatabaseConfig>;
+	 *  reportFilters: object;
+	 * }} request
 	 */
-	async #handleEventReportExcel({ validQueryParams, res, dbConfig }) {
+	async #handleEventReportExcel({ validQueryParams, res, dbConfig, reportFilters }) {
 		await eventExcelReport({
 			axios: this.#axios,
 			res,
@@ -150,14 +173,7 @@ export class EventReportController {
 				sortBy: validQueryParams.sortBy,
 				descending: validQueryParams.descending,
 			},
-			reportFilters: {
-				vehicleId: validQueryParams.vehicleId,
-				ruleId: validQueryParams.ruleId,
-				inout: validQueryParams.inout,
-				geofenceId: validQueryParams.geofenceId,
-				type: validQueryParams.type,
-				deventId: validQueryParams.deventId,
-			},
+			reportFilters,
 			enterpriseData: dbConfig.enterprise,
 			filterByLabel: validQueryParams.filterByLabel,
 		});

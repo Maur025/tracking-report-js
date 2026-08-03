@@ -21,16 +21,16 @@ export async function* eventReportStream({ axios, database, pagination, filters 
 				filters,
 			});
 
-			if (eventList.length <= 0) {
+			if (eventList.data?.length <= 0) {
 				hasMoreData = false;
 				break;
 			}
 
-			for (const event of eventList) {
+			for (const event of eventList.data) {
 				yield event;
 			}
 
-			if (eventList.length < size) {
+			if (eventList.data?.length < size) {
 				hasMoreData = false;
 				break;
 			}
