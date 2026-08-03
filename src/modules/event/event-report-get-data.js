@@ -1,4 +1,4 @@
-import { getObjectOfString } from "../../core/common/get-object-of-string.js";
+import { mapResponseToReportEvent } from "./map-response-to-report-event.js";
 
 export const eventReportGetData = async ({
 	axios,
@@ -34,7 +34,7 @@ export const eventReportGetData = async ({
 	}
 
 	return {
-		data: mapResponseToReportData(response.data?.content),
+		data: mapResponseToReportEvent(response.data?.content),
 		pagination: response.data?.pagination ?? null,
 	};
 };
@@ -86,22 +86,3 @@ const transformFilters = (filters) => {
 
 	return transformedFilters;
 };
-
-const mapResponseToReportData = (data) =>
-	data?.map((item) => ({
-		vehicles: item.vehicle.map((v) => v.name).join(", "),
-		vehicleOtherData: getObjectOfString(item.vehicle?.metadata),
-		geofence: item.geofence?.name,
-		rule: item.rule?.name,
-		ruleDescription: item.rule?.description,
-		deviceImei: item.device?.imei,
-		deviceType: item.device?.gpsspec_id,
-		devicePosition: [item.lon, item.lat],
-		date: item.date,
-		eventName: item.type_name,
-		inout: item.inout,
-		conditionOperator: item.condition_operator,
-		conditionValue: item.condition_value,
-		devent: item.devent?.name,
-		value: item.value,
-	}));

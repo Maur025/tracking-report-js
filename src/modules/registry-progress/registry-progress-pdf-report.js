@@ -1,21 +1,26 @@
-import { getFormatDate } from "../../core/common/get-format-date.js";
 import { initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
-import { getEventValues } from "./common/event-report-common.js";
-import { eventReportStream } from "./event-report-stream.js";
+import {
+	getDate,
+	getItemProgressName,
+	getProgressValue,
+	getTypeProgress,
+	getVehicleName,
+} from "./common/registry-progress-report-common.js";
+import { registryProgressReportStream } from "./registry-progress-stream.js";
 
 /**
  * @param {object} request
- * @param {import('axios')} request.axios
+ * @param {import('axios').AxiosInstance} request.axios
  * @param {import('express').Response} request.res
  * @param {{disposition: string, fileName: string}} request.reportParams
  * @param {{name:string, host:string}} request.databaseConfig
- * @param {{sortBy: string, descending: string}} request.paginationParams
+ * @param {{sortBy: string, descending: boolean}} request.paginationParams
  * @param {Record<string, unknown>} request.reportFilters
  * @param {{name:string, color:string, image:string}} request.enterpriseData
  * @param {string} request.filterByLabel
  */
-export const eventPdfReport = async ({
+export const registryProgressPdfReport = async ({
 	axios,
 	res,
 	reportParams,
@@ -26,7 +31,7 @@ export const eventPdfReport = async ({
 	filterByLabel,
 }) => {
 	const dataSource = () =>
-		eventReportStream({
+		registryProgressReportStream({
 			axios,
 			database: databaseConfig,
 			pagination: paginationParams,
@@ -44,7 +49,7 @@ export const eventPdfReport = async ({
 
 	const build = reportTable({
 		dataSource,
-		mainTitle: "EVENTOS REGISTRADOS",
+		mainTitle: "REGISTRO DE PROGRESO",
 		header: {
 			userName: "Usuario de Prueba",
 			filterBy: filterByLabel,
@@ -52,28 +57,28 @@ export const eventPdfReport = async ({
 			enterpriseLogo: enterpriseData.image,
 		},
 		table: {
-			columnWidths: [30, 90, 70, 110, 80, 110],
+			columnWidths: [30, 90, 90, 60, 90, 90, 60],
 			headers: [
 				{ text: "Nro", fontSize: 9 },
-				{ text: "Fecha", fontSize: 9 },
+				{ text: "Desde", fontSize: 9 },
+				{ text: "Hasta", fontSize: 9 },
 				{ text: "Tipo", fontSize: 9 },
-				{ text: "Regla", fontSize: 9 },
+				{ text: "Nombre", fontSize: 9 },
 				{ text: "Vehículo", fontSize: 9 },
-				{ text: "Evento", fontSize: 9 },
+				{ text: "Progreso", fontSize: 9 },
 			],
-			body: (item, index) => {
-				const { eventName, eventDetail } = getEventValues(item);
-				const formattedDate = getFormatDate({ date: new Date(item.date) });
-
-				return [
-					{ text: index, fontSize: 8 },
-					{ text: formattedDate, fontSize: 8 },
-					{ text: eventName, fontSize: 8 },
-					{ text: item.rule, fontSize: 8 },
-					{ text: item.vehicles, fontSize: 8 },
-					{ text: eventDetail, fontSize: 8 },
-				];
-			},
+			body: (item, index) => [
+				{ text: index, fontSize: 8 },
+				{ text: getDate(item.dateFrom), fontSize: 8 },
+				{ text: getDate(item.dateTo), fontSize: 8 },
+				{ text: getTypeProgress(item.type), fontSize: 8 },
+				{
+					text: getItemProgressName(item.progressName, item.progressFrequencyType),
+					fontSize: 8,
+				},
+				{ text: getVehicleName(item.vehicle), fontSize: 8 },
+				{ text: getProgressValue(item.progressValue), fontSize: 8 },
+			],
 		},
 	});
 
