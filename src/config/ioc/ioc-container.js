@@ -12,6 +12,7 @@ import { socketClientHandler } from "../../core/socket-client/socket-client-hand
 import { EventReportController } from "../../modules/event/event-report.controller.js";
 import { RegistryProgressController } from "../../modules/registry-progress/registry-progress.controller.js";
 import { RulesController } from "../../modules/rules/rules.controller.js";
+import { ProgressController } from "../../modules/progress/progress.controller.js";
 
 const iocContainer = createContainer({
 	injectionMode: InjectionMode.PROXY,
@@ -51,6 +52,7 @@ iocContainer.register({
 	eventReportController: asClass(EventReportController).singleton(),
 	registryProgressController: asClass(RegistryProgressController).singleton(),
 	rulesController: asClass(RulesController).singleton(),
+	progressController: asClass(ProgressController).singleton(),
 
 	controllers: asFunction(() =>
 		controllerModules.map((module) => iocContainer.resolve(module.name)),
