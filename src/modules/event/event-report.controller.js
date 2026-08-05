@@ -141,6 +141,7 @@ export class EventReportController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: dbConfig,
 			paginationParams: {
@@ -167,6 +168,7 @@ export class EventReportController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: { name: validQueryParams.databaseName, host: dbConfig.host },
 			paginationParams: {

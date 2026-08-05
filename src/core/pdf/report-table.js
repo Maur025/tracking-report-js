@@ -29,12 +29,13 @@ import { reportTableTemplate } from "./report-table-template.js";
  * @param {string} request.mainTitle
  * @param {HeaderObject} request.header
  * @param {TableObject} request.table
+ * @param {string} request.zoneId
  */
 export const reportTable =
-	({ dataSource, mainTitle = "REPORT EXAMPLE", header = {}, table = {} }) =>
+	({ dataSource, mainTitle = "REPORT EXAMPLE", header = {}, table = {}, zoneId }) =>
 	/**@param {typeof import('pdfkit')} document */
 	(document) => {
-		const { columnWidths = [], headers = [], body = () => [] } = table;
+		const { columnWidths = [], headers: columnHeaders = [], body = () => [] } = table;
 
 		const {
 			doc,
@@ -49,7 +50,7 @@ export const reportTable =
 		let pageNumber = 1;
 
 		setMainTitle(mainTitle, !!header.enterpriseLogo);
-		buildHeader(header);
+		buildHeader({ ...header, zoneId });
 
 		doc.moveDown(2);
 
@@ -57,7 +58,7 @@ export const reportTable =
 
 		let currentY = doc.y;
 
-		addTableHeader({ headers, columnX, yPosition: currentY });
+		addTableHeader({ headers: columnHeaders, columnX, yPosition: currentY });
 
 		currentY += 15;
 
@@ -71,7 +72,7 @@ export const reportTable =
 		const cellPaddingHorizontal = 4;
 		const footerHeight = 30;
 
-		addFooter({ footerHeight, pageNumber, paddingTop: 10 });
+		addFooter({ footerHeight, pageNumber, paddingTop: 10, zoneId });
 
 		dataStream.on("data", (item) => {
 			const values = body(item, index);
@@ -125,7 +126,7 @@ export const reportTable =
 		doc.on("pageAdded", () => {
 			pageNumber++;
 
-			addFooter({ footerHeight, pageNumber, paddingTop: 10 });
+			addFooter({ footerHeight, pageNumber, paddingTop: 10, zoneId });
 		});
 
 		dataStream.on("end", () => {

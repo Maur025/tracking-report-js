@@ -1,7 +1,7 @@
-import { getFormatDate } from "../../../core/common/date/get-format-date.js";
+import { getFormatDateOfTimestamp } from "../../../core/common/date/get-format-date.js";
 
-export const getDate = (value) => {
-	return value ? getFormatDate({ date: new Date(value) }) : "N/A";
+export const getDate = (value, zoneId) => {
+	return value ? getFormatDateOfTimestamp({ timestamp: value, zoneId }) : "N/A";
 };
 
 export const getVehicleName = (value) => {

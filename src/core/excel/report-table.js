@@ -26,10 +26,11 @@ import { reportTableTemplate } from "./report-table-template.js";
  *  body: (item: object, index: number) => ColumnParam[];
  * };
  * font: "Inter"|"Arial";
+ * zoneId: string
  * }} request
  */
 export const reportTable =
-	({ dataSource, mainTitle = "REPORT TABLE EXAMPLE", header = {}, table = {}, font }) =>
+	({ dataSource, mainTitle = "REPORT TABLE EXAMPLE", header = {}, table = {}, font, zoneId }) =>
 	/**
 	 * @param {{
 	 *  workbook:import('exceljs').stream.xlsx.WorkbookWriter;
@@ -45,7 +46,7 @@ export const reportTable =
 		const tableSheet = addSheet(mainTitle);
 		addColumnDefinitions({ headers, font, defaultSize: 11, sheet: tableSheet });
 
-		addHeader({ ...header, sheet: tableSheet, mainTitle });
+		addHeader({ ...header, sheet: tableSheet, mainTitle, zoneId });
 
 		addRow({ sheet: tableSheet, columns: [] });
 

@@ -1,4 +1,4 @@
-import { getFormatDate } from "../common/date/get-format-date.js";
+import { getFormatDateOfTimestamp } from "../common/date/get-format-date.js";
 import { getFont } from "./generate-pdf.js";
 
 /** @param {typeof import('pdfkit')} document */
@@ -11,6 +11,7 @@ export const reportTableTemplate = (document) => {
 		filterBy = null,
 		enterpriseName = null,
 		enterpriseLogo = null,
+		zoneId = "UTC",
 	}) => {
 		if (enterpriseLogo) {
 			document.image(enterpriseLogo, document.page.margins.left, document.page.margins.top, {
@@ -36,7 +37,7 @@ export const reportTableTemplate = (document) => {
 		}
 
 		document.text(
-			`Fecha de emisión: ${issueDate ? getFormatDate({ date: issueDate }) : getFormatDate({ date: new Date() })}`,
+			`Fecha de emisión: ${issueDate ? getFormatDateOfTimestamp({ timestamp: issueDate, zoneId }) : getFormatDateOfTimestamp({ zoneId })}`,
 		);
 
 		document.fontSize(10).restore();
@@ -83,11 +84,11 @@ export const reportTableTemplate = (document) => {
 		document.moveTo(startXPosition, yPosition).lineTo(endX, yPosition).stroke();
 	};
 
-	const addFooter = ({ footerHeight, pageNumber, paddingTop }) => {
+	const addFooter = ({ footerHeight, pageNumber, paddingTop, zoneId }) => {
 		const yPosition =
 			document.page.height - document.page.margins.bottom - footerHeight + paddingTop;
 
-		const currentDate = getFormatDate({ date: new Date() });
+		const currentDate = getFormatDateOfTimestamp({ zoneId });
 
 		document
 			.fontSize(8)
