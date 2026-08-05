@@ -1,6 +1,5 @@
 import { logger } from "../../core/common/logger.js";
 import { rulesReportGetData } from "./rules-get-data.js";
-import { normalizeRuleItem } from "./rules.normalize.js";
 
 /**
  * @param {object} request
@@ -35,7 +34,7 @@ export async function* rulesReportStream({ axios, database, pagination, filters 
 			}
 
 			for (const rule of ruleList.data) {
-				yield normalizeRuleItem(rule);
+				yield rule;
 			}
 
 			if (ruleList.data?.length < size) {

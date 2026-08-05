@@ -2,7 +2,7 @@ import { eventReportQueryParam } from "./dto/event-report-query-param.js";
 import { eventExcelReport } from "./event-excel-report.js";
 import { eventPdfReport } from "./event-pdf-report.js";
 import { HttpStatusCode } from "axios";
-import { dateFilterProcess } from "../../core/common/date-filter-process.js";
+import { dateFilterProcess } from "../../core/common/date/date-filter-process.js";
 import { eventReportGetData } from "./event-report-get-data.js";
 import { serverResponse } from "../../core/server-response.js";
 

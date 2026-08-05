@@ -2,7 +2,7 @@ import { registryProgressQueryParam } from "./dto/registry-progress-query-param.
 import { registryProgressExcelReport } from "./registry-progress-excel-report.js";
 import { registryProgressPdfReport } from "./registry-progress-pdf-report.js";
 import { HttpStatusCode } from "axios";
-import { dateFilterProcess } from "../../core/common/date-filter-process.js";
+import { dateFilterProcess } from "../../core/common/date/date-filter-process.js";
 import { registryProgressReportGetData } from "./registry-progress-get-data.js";
 import { serverResponse } from "../../core/server-response.js";
 

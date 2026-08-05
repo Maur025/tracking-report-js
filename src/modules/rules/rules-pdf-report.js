@@ -1,12 +1,19 @@
 import { initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
+import {
+	getFrequencies,
+	getRuleName,
+	getRuleEvents,
+	getRuleScope,
+	getRuleOperationalContext,
+} from "./common/rule-report-common.js";
 import { rulesReportStream } from "./rules-stream.js";
 
 /**
  * @param {object} request
  * @param {import('axios').AxiosInstance} request.axios
  * @param {import('express').Response} request.res
- * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{disposition: string, fileName: string, zoneId?:string}} request.reportParams
  * @param {{name:string, host:string}} request.databaseConfig
  * @param {{sortBy: string, descending: boolean}} request.paginationParams
  * @param {Record<string, unknown>} request.reportFilters
@@ -42,7 +49,7 @@ export const rulesPdfReport = async ({
 
 	const build = reportTable({
 		dataSource,
-		mainTitle: "REPORTE DE RULES",
+		mainTitle: "REGLAS CONFIGURADAS",
 		header: {
 			userName: "Usuario de Prueba",
 			filterBy: filterByLabel,
@@ -50,20 +57,29 @@ export const rulesPdfReport = async ({
 			enterpriseLogo: enterpriseData.image,
 		},
 		table: {
-			columnWidths: [30, 80, 80, 140, 180],
+			columnWidths: [30, 110, 110, 80, 70, 90],
 			headers: [
-				{ text: "Nro", fontSize: 10 },
-				{ text: "Tipo", fontSize: 10 },
-				{ text: "Nombre", fontSize: 10 },
-				{ text: "Alertas", fontSize: 10 },
-				{ text: "Frecuencia", fontSize: 10 },
+				{ text: "Nro", fontSize: 9 },
+				{ text: "Nombre", fontSize: 9 },
+				{ text: "Frecuencia", fontSize: 9 },
+				{ text: "Eventos", fontSize: 9 },
+				{ text: "Alcance", fontSize: 9 },
+				{ text: "Contexto Operativo", fontSize: 9 },
 			],
 			body: (item, index) => [
-				{ text: index, fontSize: 9 },
-				{ text: item.type ?? "N/A", fontSize: 9 },
-				{ text: item.name ?? "N/A", fontSize: 9 },
-				{ text: item.alerts ?? "N/A", fontSize: 9 },
-				{ text: item.frequency ?? "N/A", fontSize: 9 },
+				{ text: index, fontSize: 8 },
+				{ text: getRuleName(item.name, item.type), fontSize: 8 },
+				{ text: getFrequencies(item.frequency, reportParams.zoneId), fontSize: 8 },
+				{ text: getRuleEvents(item.alerts, item.notifications), fontSize: 8 },
+				{ text: getRuleScope(item.groups, item.vehicles), fontSize: 8 },
+				{
+					text: getRuleOperationalContext(
+						item.geofences,
+						item.interestPoints,
+						item.sensors,
+					),
+					fontSize: 8,
+				},
 			],
 		},
 	});

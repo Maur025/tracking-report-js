@@ -22,8 +22,6 @@ export const registryProgressReportGetData = async ({
 }) => {
 	const transformedFilters = transformFilters(filters);
 
-	console.log(transformedFilters);
-
 	const response = await axios.get(`${dbHost}/${dbName}/registry_progress`, {
 		params: {
 			...transformedFilters,

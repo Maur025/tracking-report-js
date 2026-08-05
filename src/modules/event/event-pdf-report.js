@@ -1,4 +1,4 @@
-import { getFormatDate } from "../../core/common/get-format-date.js";
+import { getFormatDate } from "../../core/common/date/get-format-date.js";
 import { initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
 import { getEventValues } from "./common/event-report-common.js";
