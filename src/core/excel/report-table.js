@@ -53,7 +53,7 @@ export const reportTable =
 			sheet: tableSheet,
 			columns: headers,
 			styles: true,
-			rowStyle: { bold: true },
+			rowStyle: { bold: true, name: font },
 		});
 
 		const dataStream = Readable.from(dataSource());
@@ -75,8 +75,8 @@ export const reportTable =
 			await endStream();
 		});
 
-		dataStream.on("error", async (errr) => {
-			logger.error(`Error generating report: ${errr.message}`);
+		dataStream.on("error", async (err) => {
+			logger.error(`Error generating report: ${err.message}`);
 			await endStream();
 		});
 	};

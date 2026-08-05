@@ -1,4 +1,4 @@
-import { getFormatDate } from "../common/get-format-date.js";
+import { getFormatDate } from "../common/date/get-format-date.js";
 import { getFont } from "./generate-pdf.js";
 
 /** @param {typeof import('pdfkit')} document */

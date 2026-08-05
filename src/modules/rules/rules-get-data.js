@@ -1,3 +1,5 @@
+import { mapResponseToReportRule } from "./map-response-to-report-rule.js";
+
 /**
  * @param {object} request
  * @param {import('axios').AxiosInstance} request.axios
@@ -18,9 +20,11 @@ export const rulesReportGetData = async ({
 	},
 	filters = {},
 }) => {
+	const transformedFilters = transformFilters(filters);
+
 	const response = await axios.get(`${dbHost}/${dbName}/rules`, {
 		params: {
-			...filters,
+			...transformedFilters,
 			page: pagination.page,
 			size: pagination.size,
 			sortBy: pagination.sortBy,
@@ -38,7 +42,40 @@ export const rulesReportGetData = async ({
 	}
 
 	return {
-		data: response.data?.content ?? response.data?.data ?? [],
+		data: mapResponseToReportRule(response.data?.content),
 		pagination: response.data?.pagination ?? null,
 	};
+};
+
+/**
+ * @param {Record<string, unknown>} filters
+ */
+const transformFilters = (filters) => {
+	const transformedFilters = {};
+
+	for (const [key, value] of Object.entries(filters)) {
+		if (!value) {
+			continue;
+		}
+
+		switch (key) {
+			case "type":
+				transformedFilters["[type][equal]"] = value;
+				break;
+			case "fromDate":
+				transformedFilters["[date_from][between][from]"] = value;
+				break;
+			case "toDate":
+				transformedFilters["[date_from][between][to]"] = value;
+				break;
+			case "keyword":
+				transformedFilters["[name][like]"] = value;
+				break;
+			default:
+				transformedFilters[key] = value;
+				break;
+		}
+	}
+
+	return transformedFilters;
 };

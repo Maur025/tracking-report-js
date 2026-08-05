@@ -1,5 +1,12 @@
 import { generateExcel } from "../../core/excel/generate-excel.js";
 import { reportTable } from "../../core/excel/report-table.js";
+import {
+	getFrequencies,
+	getRuleEvents,
+	getRuleName,
+	getRuleOperationalContext,
+	getRuleScope,
+} from "./common/rule-report-common.js";
 import { rulesReportStream } from "./rules-stream.js";
 
 /**
@@ -39,7 +46,7 @@ export const rulesExcelReport = async ({
 
 	const reportBuilder = reportTable({
 		dataSource,
-		mainTitle: "REPORTE DE RULES",
+		mainTitle: "REGLAS CONFIGURADAS",
 		header: {
 			userName: { value: "Usuario de Prueba" },
 			filterBy: { value: filterByLabel },
@@ -53,17 +60,25 @@ export const rulesExcelReport = async ({
 		table: {
 			headers: [
 				{ value: "Nro", width: 10 },
-				{ value: "Tipo", width: 20 },
 				{ value: "Nombre", width: 35 },
-				{ value: "Alertas", width: 50 },
-				{ value: "Frecuencia", width: 80 },
+				{ value: "Frecuencia", width: 30 },
+				{ value: "Eventos", width: 20 },
+				{ value: "Alcance", width: 20 },
+				{ value: "Contexto Operativo", width: 20 },
 			],
 			body: (item, index) => [
 				{ value: index },
-				{ value: item.type ?? "N/A" },
-				{ value: item.name ?? "N/A" },
-				{ value: item.alerts ?? "N/A" },
-				{ value: item.frequency ?? "N/A" },
+				{ value: getRuleName(item.name, item.type) },
+				{ value: getFrequencies(item.frequency, reportParams.zoneId) },
+				{ value: getRuleEvents(item.alerts, item.notifications) },
+				{ value: getRuleScope(item.groups, item.vehicles) },
+				{
+					value: getRuleOperationalContext(
+						item.geofences,
+						item.interestPoints,
+						item.sensors,
+					),
+				},
 			],
 		},
 		font: "Inter",

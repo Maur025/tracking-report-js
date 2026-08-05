@@ -3,10 +3,7 @@ import { rulesQueryParam } from "./dto/rules-query-param.js";
 import { rulesExcelReport } from "./rules-excel-report.js";
 import { rulesPdfReport } from "./rules-pdf-report.js";
 import { rulesReportGetData } from "./rules-get-data.js";
-import { normalizeRuleItem } from "./rules.normalize.js";
 import { serverResponse } from "../../core/server-response.js";
-
-const normalizeSortBy = (sortBy) => (sortBy === "data" ? "name" : sortBy);
 
 export class RulesController {
 	#resource = "reports/rules";
@@ -57,13 +54,13 @@ export class RulesController {
 			databaseName: validQueryParams.databaseName,
 		});
 
-		const normalizedSortBy = normalizeSortBy(validQueryParams.sortBy);
-
-		const reportFilters = {};
+		const reportFilters = {
+			keyword: validQueryParams.keyword,
+		};
 
 		if (!validQueryParams.format || validQueryParams.format === "json") {
 			return this.#handleRulesReportJson({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -72,7 +69,7 @@ export class RulesController {
 
 		if (validQueryParams.format === "excel") {
 			await this.#handleRulesReportExcel({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -81,7 +78,7 @@ export class RulesController {
 		}
 
 		await this.#handleRulesReportPdf({
-			validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+			validQueryParams,
 			res,
 			dbConfig,
 			reportFilters,
@@ -112,7 +109,7 @@ export class RulesController {
 
 		return res.status(HttpStatusCode.Ok).json(
 			serverResponse({
-				data: rulesData.data.map(normalizeRuleItem),
+				data: rulesData.data,
 				code: HttpStatusCode.Ok,
 				pagination: rulesData.pagination,
 			}),
@@ -135,6 +132,7 @@ export class RulesController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: dbConfig,
 			paginationParams: {
@@ -161,6 +159,7 @@ export class RulesController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: { name: validQueryParams.databaseName, host: dbConfig.host },
 			paginationParams: {

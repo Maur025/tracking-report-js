@@ -1,4 +1,4 @@
-import { getFormatDate } from "../../../core/common/get-format-date.js";
+import { getFormatDate } from "../../../core/common/date/get-format-date.js";
 
 export const getDate = (value) => {
 	return value ? getFormatDate({ date: new Date(value) }) : "N/A";

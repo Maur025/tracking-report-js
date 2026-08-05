@@ -1,4 +1,4 @@
-import { getFormatDate } from "../common/get-format-date.js";
+import { getFormatDate } from "../common/date/get-format-date.js";
 
 /**
  * @typedef {{
@@ -32,12 +32,18 @@ export const reportTableTemplate = ({ workbook }) => {
 	 * }} request
 	 */
 	const addColumnDefinitions = ({ headers, font, defaultSize, sheet }) => {
+		/** @type {import('exceljs').Column[]} columnDefinitions */
 		const columnDefinitions = headers.map((header) => ({
 			key: normalizedName(header.value),
 			width: header.width || 20,
 			style: {
 				font: { name: font, size: header.fontSize || defaultSize || 8 },
 				bold: header.bold || false,
+			},
+			alignment: {
+				wrapText: true,
+				vertical: "left",
+				horizontal: "center",
 			},
 		}));
 
@@ -69,10 +75,16 @@ export const reportTableTemplate = ({ workbook }) => {
 			sheet,
 			columns: [{ value: mainTitle, fontSize: 14, bold: true }],
 			styles: true,
+			alignment: { wrapText: false },
 		});
 
 		if (enterpriseName && enterpriseName.value) {
-			addRow({ sheet, columns: [enterpriseName], styles: true });
+			addRow({
+				sheet,
+				columns: [enterpriseName],
+				styles: true,
+				alignment: { wrapText: false },
+			});
 		}
 
 		if (userName && userName.value) {
@@ -80,17 +92,23 @@ export const reportTableTemplate = ({ workbook }) => {
 				sheet,
 				columns: [{ value: "Usuario:", bold: true }, userName],
 				styles: true,
+				alignment: { wrapText: false },
 			});
 		}
 
 		if (filterBy && filterBy.value) {
-			addRow({ sheet, columns: [{ value: "Filtros:", bold: true }, filterBy], styles: true });
+			addRow({
+				sheet,
+				columns: [{ value: "Filtros:", bold: true }, filterBy],
+				styles: true,
+				alignment: { wrapText: false },
+			});
 		}
 
 		addRow({
 			sheet,
 			columns: [
-				{ value: "Fecha de emisión:", bold: true },
+				{ value: "Fecha:", bold: true },
 				{
 					value:
 						issueDate && issueDate.value
@@ -98,6 +116,7 @@ export const reportTableTemplate = ({ workbook }) => {
 							: getFormatDate({ date: new Date() }),
 				},
 			],
+			alignment: { wrapText: false },
 			styles: true,
 		});
 	};
@@ -108,13 +127,18 @@ export const reportTableTemplate = ({ workbook }) => {
 	 *  columns: ColumnParam[]
 	 *  styles: boolean
 	 *  rowStyle: import('exceljs').Font | null
+	 *  alignment: import('exceljs').Alignment | null
 	 * }} request
 	 */
-	const addRow = ({ sheet, columns, styles = false, rowStyle = null }) => {
+	const addRow = ({ sheet, columns, styles = false, rowStyle = null, alignment }) => {
+		const alignmentDefault = { vertical: "middle", horizontal: "left", wrapText: true };
+
 		const rowSheet = sheet.addRow(
 			columns.map((column) => column.value),
 			"i",
 		);
+
+		rowSheet.alignment = { ...alignmentDefault, ...alignment };
 
 		if (!styles) {
 			rowSheet.commit();
@@ -122,7 +146,8 @@ export const reportTableTemplate = ({ workbook }) => {
 		}
 
 		if (rowStyle) {
-			rowSheet.font = rowStyle;
+			rowSheet.font = { ...rowSheet.font, ...rowStyle };
+			console.log({ after: rowSheet.font });
 		} else {
 			columns.forEach((column, index) => {
 				if (!column.fontSize && (column.bold === undefined || column.bold === null)) return;

@@ -1,6 +1,7 @@
-import { object, string } from "zod";
+import { string } from "zod";
+import { dateFilterRequestSchema } from "../../../core/common/dto/date-filter-request-schema.js";
 
-export const rulesQueryParam = object({
+export const rulesQueryParam = dateFilterRequestSchema.extend({
 	databaseName: string().nonempty(),
 	sortBy: string().optional().default("name"),
 	descending: string()
@@ -19,4 +20,5 @@ export const rulesQueryParam = object({
 	fileName: string().optional().default("example"),
 	filterByLabel: string().nonempty().optional(),
 	format: string().nonempty().optional(),
+	keyword: string().nonempty().optional(),
 });
