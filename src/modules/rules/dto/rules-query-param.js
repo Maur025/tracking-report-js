@@ -1,4 +1,4 @@
-import { string } from "zod";
+import { array, string, union } from "zod";
 import { dateFilterRequestSchema } from "../../../core/common/dto/date-filter-request-schema.js";
 
 export const rulesQueryParam = dateFilterRequestSchema.extend({
@@ -21,4 +21,9 @@ export const rulesQueryParam = dateFilterRequestSchema.extend({
 	filterByLabel: string().nonempty().optional(),
 	format: string().nonempty().optional(),
 	keyword: string().nonempty().optional(),
+	type: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
+	frequencyWeekday: union([
+		string().nonempty(),
+		array(string().nonempty()).nonempty(),
+	]).optional(),
 });

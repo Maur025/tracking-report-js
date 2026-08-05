@@ -82,6 +82,7 @@ export const rulesPdfReport = async ({
 				},
 			],
 		},
+		zoneId: reportParams.zoneId,
 	});
 
 	build(document);

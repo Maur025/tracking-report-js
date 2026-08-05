@@ -56,6 +56,8 @@ export class RulesController {
 
 		const reportFilters = {
 			keyword: validQueryParams.keyword,
+			type: validQueryParams.type,
+			frequencyWeekday: validQueryParams.frequencyWeekday,
 		};
 
 		if (!validQueryParams.format || validQueryParams.format === "json") {

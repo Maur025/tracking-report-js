@@ -1,4 +1,4 @@
-import { getFormatDate } from "../common/date/get-format-date.js";
+import { getFormatDateOfTimestamp } from "../common/date/get-format-date.js";
 
 /**
  * @typedef {{
@@ -59,6 +59,7 @@ export const reportTableTemplate = ({ workbook }) => {
 	 *  filterBy: ColumnParam,
 	 *  enterpriseName: ColumnParam,
 	 *  enterpriseLogo: ColumnParam
+	 * 	zoneId: string
 	 * }} request
 	 */
 	const addHeader = ({
@@ -70,6 +71,7 @@ export const reportTableTemplate = ({ workbook }) => {
 		enterpriseName = null,
 		// eslint-disable-next-line no-unused-vars
 		enterpriseLogo = null,
+		zoneId = "UTC",
 	}) => {
 		addRow({
 			sheet,
@@ -112,8 +114,8 @@ export const reportTableTemplate = ({ workbook }) => {
 				{
 					value:
 						issueDate && issueDate.value
-							? getFormatDate({ date: issueDate.value })
-							: getFormatDate({ date: new Date() }),
+							? getFormatDateOfTimestamp({ timestamp: issueDate.value, zoneId })
+							: getFormatDateOfTimestamp({ zoneId }),
 				},
 			],
 			alignment: { wrapText: false },

@@ -1,4 +1,4 @@
-import { getFormatDate } from "../../core/common/date/get-format-date.js";
+import { getFormatDateOfTimestamp } from "../../core/common/date/get-format-date.js";
 import { initDocument } from "../../core/pdf/generate-pdf.js";
 import { reportTable } from "../../core/pdf/report-table.js";
 import { getEventValues } from "./common/event-report-common.js";
@@ -8,7 +8,7 @@ import { eventReportStream } from "./event-report-stream.js";
  * @param {object} request
  * @param {import('axios')} request.axios
  * @param {import('express').Response} request.res
- * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{disposition: string, fileName: string, zoneId:string}} request.reportParams
  * @param {{name:string, host:string}} request.databaseConfig
  * @param {{sortBy: string, descending: string}} request.paginationParams
  * @param {Record<string, unknown>} request.reportFilters
@@ -63,7 +63,10 @@ export const eventPdfReport = async ({
 			],
 			body: (item, index) => {
 				const { eventName, eventDetail } = getEventValues(item);
-				const formattedDate = getFormatDate({ date: new Date(item.date) });
+				const formattedDate = getFormatDateOfTimestamp({
+					timestamp: item.date,
+					zoneId: reportParams.zoneId,
+				});
 
 				return [
 					{ text: index, fontSize: 8 },
@@ -75,6 +78,7 @@ export const eventPdfReport = async ({
 				];
 			},
 		},
+		zoneId: reportParams.zoneId,
 	});
 
 	build(document);

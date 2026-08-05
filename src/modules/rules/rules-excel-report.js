@@ -13,7 +13,7 @@ import { rulesReportStream } from "./rules-stream.js";
  * @param {object} request
  * @param {import('axios').AxiosInstance} request.axios
  * @param {import('express').Response} request.res
- * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{disposition: string, fileName: string, zoneId:string}} request.reportParams
  * @param {{name:string, host:string}} request.databaseConfig
  * @param {{sortBy: string, descending: boolean}} request.paginationParams
  * @param {Record<string, unknown>} request.reportFilters
@@ -82,6 +82,7 @@ export const rulesExcelReport = async ({
 			],
 		},
 		font: "Inter",
+		zoneId: reportParams.zoneId,
 	});
 
 	await reportBuilder({ workbook, closeWorkbook });

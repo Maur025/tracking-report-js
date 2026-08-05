@@ -71,6 +71,9 @@ const transformFilters = (filters) => {
 			case "keyword":
 				transformedFilters["[name][like]"] = value;
 				break;
+			case "frequencyWeekday":
+				transformedFilters["[frequency][frequency][equal]"] = value;
+				break;
 			default:
 				transformedFilters[key] = value;
 				break;

@@ -13,7 +13,7 @@ import { registryProgressReportStream } from "./registry-progress-stream.js";
  * @param {object} request
  * @param {import('axios').AxiosInstance} request.axios
  * @param {import('express').Response} request.res
- * @param {{disposition: string, fileName: string}} request.reportParams
+ * @param {{disposition: string, fileName: string, zoneId:string}} request.reportParams
  * @param {{name:string, host:string}} request.databaseConfig
  * @param {{sortBy: string, descending: boolean}} request.paginationParams
  * @param {Record<string, unknown>} request.reportFilters
@@ -69,8 +69,8 @@ export const registryProgressPdfReport = async ({
 			],
 			body: (item, index) => [
 				{ text: index, fontSize: 8 },
-				{ text: getDate(item.dateFrom), fontSize: 8 },
-				{ text: getDate(item.dateTo), fontSize: 8 },
+				{ text: getDate(item.dateFrom, reportParams.zoneId), fontSize: 8 },
+				{ text: getDate(item.dateTo, reportParams.zoneId), fontSize: 8 },
 				{ text: getTypeProgress(item.type), fontSize: 8 },
 				{
 					text: getItemProgressName(item.progressName, item.progressFrequencyType),
@@ -80,6 +80,7 @@ export const registryProgressPdfReport = async ({
 				{ text: getProgressValue(item.progressValue), fontSize: 8 },
 			],
 		},
+		zoneId: reportParams.zoneId,
 	});
 
 	build(document);
