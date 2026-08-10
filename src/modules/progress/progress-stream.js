@@ -1,5 +1,4 @@
 import { logger } from "../../core/common/logger.js";
-import { normalizeProgressItem } from "./progress.normalize.js";
 import { progressReportGetData } from "./progress-get-data.js";
 
 /**
@@ -35,7 +34,7 @@ export async function* progressReportStream({ axios, database, pagination, filte
 			}
 
 			for (const progress of progressList.data) {
-				yield normalizeProgressItem(progress);
+				yield progress;
 			}
 
 			if (progressList.data?.length < size) {

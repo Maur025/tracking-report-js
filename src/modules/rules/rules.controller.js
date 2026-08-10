@@ -39,15 +39,6 @@ export class RulesController {
 	async #handleRulesGet(req, res) {
 		const validQueryParams = rulesQueryParam.parse(req.query);
 
-		if (
-			validQueryParams.format &&
-			!["json", "excel", "pdf"].includes(validQueryParams.format)
-		) {
-			return res
-				.status(HttpStatusCode.BadRequest)
-				.json({ error: "Invalid format parameter" });
-		}
-
 		const { getConfig } = this.#getDatabaseConfig;
 
 		const dbConfig = await getConfig({

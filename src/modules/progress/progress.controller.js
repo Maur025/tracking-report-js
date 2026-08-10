@@ -3,10 +3,8 @@ import { progressQueryParam } from "./dto/progress-query-param.js";
 import { progressExcelReport } from "./progress-excel-report.js";
 import { progressPdfReport } from "./progress-pdf-report.js";
 import { progressReportGetData } from "./progress-get-data.js";
-import { normalizeProgressItem } from "./progress.normalize.js";
 import { serverResponse } from "../../core/server-response.js";
-
-const normalizeSortBy = (sortBy) => (sortBy === "data" ? "name" : sortBy);
+import { dateFilterProcess } from "../../core/common/date/date-filter-process.js";
 
 export class ProgressController {
 	#resource = "reports/progress";
@@ -42,14 +40,11 @@ export class ProgressController {
 	async #handleProgressGet(req, res) {
 		const validQueryParams = progressQueryParam.parse(req.query);
 
-		if (
-			validQueryParams.format &&
-			!["json", "excel", "pdf"].includes(validQueryParams.format)
-		) {
-			return res
-				.status(HttpStatusCode.BadRequest)
-				.json({ error: "Invalid format parameter" });
-		}
+		const dateFilters = dateFilterProcess({ ...validQueryParams });
+
+		const reportFilters = {
+			...dateFilters,
+		};
 
 		const { getConfig } = this.#getDatabaseConfig;
 
@@ -57,12 +52,9 @@ export class ProgressController {
 			databaseName: validQueryParams.databaseName,
 		});
 
-		const normalizedSortBy = normalizeSortBy(validQueryParams.sortBy);
-		const reportFilters = {};
-
 		if (!validQueryParams.format || validQueryParams.format === "json") {
 			return this.#handleProgressReportJson({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -71,7 +63,7 @@ export class ProgressController {
 
 		if (validQueryParams.format === "excel") {
 			await this.#handleProgressReportExcel({
-				validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+				validQueryParams,
 				res,
 				dbConfig,
 				reportFilters,
@@ -80,7 +72,7 @@ export class ProgressController {
 		}
 
 		await this.#handleProgressReportPdf({
-			validQueryParams: { ...validQueryParams, sortBy: normalizedSortBy },
+			validQueryParams,
 			res,
 			dbConfig,
 			reportFilters,
@@ -111,7 +103,7 @@ export class ProgressController {
 
 		return res.status(HttpStatusCode.Ok).json(
 			serverResponse({
-				data: progressData.data.map(normalizeProgressItem),
+				data: progressData.data,
 				code: HttpStatusCode.Ok,
 				pagination: progressData.pagination,
 			}),
@@ -134,6 +126,7 @@ export class ProgressController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: dbConfig,
 			paginationParams: {
@@ -160,6 +153,7 @@ export class ProgressController {
 			reportParams: {
 				disposition: validQueryParams.disposition,
 				fileName: validQueryParams.fileName,
+				zoneId: validQueryParams.zoneId,
 			},
 			databaseConfig: { name: validQueryParams.databaseName, host: dbConfig.host },
 			paginationParams: {

@@ -2,8 +2,6 @@ import { getHoursOfTimestamp } from "../../../core/common/date/get-hours-of-time
 import { getWeekday } from "../../../core/common/date/get-weekday.js";
 
 export const getRuleType = (value) => {
-	console.log(value);
-
 	switch (value) {
 		case "GEOFENCES":
 			return "Geocerca";

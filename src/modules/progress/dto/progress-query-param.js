@@ -1,6 +1,7 @@
-import { object, string } from "zod";
+import { string, enum as enum_ } from "zod";
+import { dateFilterRequestSchema } from "../../../core/common/dto/date-filter-request-schema.js";
 
-export const progressQueryParam = object({
+export const progressQueryParam = dateFilterRequestSchema.extend({
 	databaseName: string().nonempty(),
 	sortBy: string().optional().default("name"),
 	descending: string()
@@ -18,5 +19,5 @@ export const progressQueryParam = object({
 	disposition: string().optional().default("inline"),
 	fileName: string().optional().default("example"),
 	filterByLabel: string().nonempty().optional(),
-	format: string().nonempty().optional(),
+	format: enum_(["json", "excel", "pdf"]).optional(),
 });

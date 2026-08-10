@@ -49,15 +49,6 @@ export class RegistryProgressController {
 			...dateFilters,
 		};
 
-		if (
-			validQueryParams.format &&
-			!["json", "excel", "pdf"].includes(validQueryParams.format)
-		) {
-			return res
-				.status(HttpStatusCode.BadRequest)
-				.json({ error: "Invalid format parameter" });
-		}
-
 		const { getConfig } = this.#getDatabaseConfig;
 
 		const dbConfig = await getConfig({
