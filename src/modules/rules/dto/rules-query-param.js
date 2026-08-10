@@ -1,4 +1,4 @@
-import { array, string, union } from "zod";
+import { array, string, union, enum as enum_ } from "zod";
 import { dateFilterRequestSchema } from "../../../core/common/dto/date-filter-request-schema.js";
 
 export const rulesQueryParam = dateFilterRequestSchema.extend({
@@ -19,7 +19,7 @@ export const rulesQueryParam = dateFilterRequestSchema.extend({
 	disposition: string().optional().default("inline"),
 	fileName: string().optional().default("example"),
 	filterByLabel: string().nonempty().optional(),
-	format: string().nonempty().optional(),
+	format: enum_(["pdf", "xlsx", "csv"]).optional(),
 	keyword: string().nonempty().optional(),
 	type: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
 	frequencyWeekday: union([

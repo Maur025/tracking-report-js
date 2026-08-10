@@ -1,5 +1,5 @@
 import { StatusCodes, ReasonPhrases } from "http-status-codes";
-import { ZodError } from "zod";
+import { flattenError, ZodError } from "zod";
 
 export class ErrorHandler {
 	/**
@@ -38,7 +38,7 @@ export class ErrorHandler {
 		return res.status(StatusCodes.BAD_REQUEST).json({
 			code: StatusCodes.BAD_REQUEST,
 			message: ReasonPhrases.BAD_REQUEST,
-			errors: err.format(),
+			errors: flattenError(err),
 		});
 	}
 

@@ -1,4 +1,4 @@
-import { array, string, union } from "zod";
+import { array, string, union, enum as enum_ } from "zod";
 import { dateFilterRequestSchema } from "../../../core/common/dto/date-filter-request-schema.js";
 
 export const registryProgressQueryParam = dateFilterRequestSchema.extend({
@@ -24,5 +24,5 @@ export const registryProgressQueryParam = dateFilterRequestSchema.extend({
 	progressId: union([string().nonempty(), array(string().nonempty()).nonempty()]).optional(),
 
 	filterByLabel: string().nonempty().optional(),
-	format: string().nonempty().optional(),
+	format: enum_(["json", "excel", "pdf"]).optional(),
 });
