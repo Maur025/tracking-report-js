@@ -10,6 +10,8 @@ export default defineConfig({
 		environment: "node",
 		globals: false,
 
-		include: ["test/unit/**/*.test.js"],
+		include: ["test/integration/**/*.test.js"],
+
+		setupFiles: ["./test/setup/integration.setup.js"],
 	},
 });

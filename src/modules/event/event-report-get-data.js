@@ -1,5 +1,10 @@
 import { mapResponseToReportEvent } from "./map-response-to-report-event.js";
-
+/**
+ * @param {{
+ *  axios: import("axios").Axios;
+ * }} request
+ * @returns
+ */
 export const eventReportGetData = async ({
 	axios,
 	dbName = "trackingdb",
