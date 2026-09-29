@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { logger } from "./core/common/logger.js";
 import { iocContainer } from "./config/ioc/ioc-container.js";
+import { logger } from "./core/common/logger.js";
 import { dbProvider } from "./core/database/db-provider.js";
 
 async function bootstrap() {
@@ -11,9 +11,8 @@ async function bootstrap() {
 	const { dbClient, migrateDb } = dbProvider({ environment });
 
 	containerAdapter.registerValue("dbClient", dbClient);
-	/**
-	 * @type {import('./core/server-app.js').ServerApp}
-	 */
+
+	/** @type {import('./core/server-app.js').ServerApp} */
 	const serverApp = iocContainer.resolve("serverApp");
 
 	/** @type {ReturnType<typeof import('./core/socket-client/socket-client-handler.js').socketClientHandler>} */
