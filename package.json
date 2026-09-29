@@ -19,9 +19,9 @@
 		"@libsql/client": "^0.17.4",
 		"atx-prettylog": "^1.0.3",
 		"awilix": "^13.0.5",
-		"axios": "^1.18.1",
+		"axios": "^1.20.0",
 		"chalk": "^5.6.2",
-		"compression": "^1.8.1",
+		"compression": "^1.8.2",
 		"cors": "^2.8.6",
 		"dotenv": "^17.4.2",
 		"drizzle-orm": "1.0.0-rc.4",
@@ -31,21 +31,21 @@
 		"pdfkit": "^0.19.1",
 		"pdfmake": "^0.3.11",
 		"tracking-common": "file:../tracking-common",
-		"uuid": "^14.0.1",
-		"zod": "^4.4.3"
+		"uuid": "^14.0.2",
+		"zod": "^4.6.5"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
-		"@types/node": "^26.0.1",
+		"@types/node": "^26.6.3",
 		"drizzle-kit": "1.0.0-rc.4",
-		"eslint": "^10.6.0",
-		"globals": "^17.7.0",
-		"vitest": "^4.1.9"
+		"eslint": "^10.11.0",
+		"globals": "^17.12.0",
+		"vitest": "^4.1.11"
 	},
 	"engines": {
 		"node": ">=24.0.0"
 	},
-	"packageManager": "pnpm@11.9.0"
+	"packageManager": "pnpm@12.6.0"
 }
