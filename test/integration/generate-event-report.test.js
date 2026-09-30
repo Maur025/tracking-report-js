@@ -1,5 +1,6 @@
 import request from "supertest";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { binaryParser } from "../common/utils.js";
 import { cleanDatabase } from "../setup/database/fixtures.js";
 import { seedEnterpriseConfig } from "../setup/database/seed.js";
 import { createTestApp } from "../setup/test-app.js";
@@ -21,8 +22,6 @@ describe("GET /api/reports/events", () => {
 	it("should fail with 400 Bad Request when required query parameters are missing", async () => {
 		// WHEN
 		const response = await request(app).get(RESOURCE_URL).buffer(true);
-
-		console.log(response);
 
 		// THEN
 		expect(response.status).toBe(400);
@@ -72,9 +71,8 @@ describe("GET /api/reports/events", () => {
 					format: "excel",
 					zoneId: "America/La_Paz",
 				})
-				.buffer(true);
-
-			console.log(response);
+				.buffer(true)
+				.parse(binaryParser);
 
 			// THEN
 			expect(response.status).toBe(200);
