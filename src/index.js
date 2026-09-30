@@ -1,24 +1,20 @@
 import "dotenv/config";
-import { logger } from "./core/common/logger.js";
 import { iocContainer } from "./config/ioc/ioc-container.js";
-import { dbProvider } from "./core/database/db-provider.js";
+import { logger } from "./core/common/logger.js";
 
 async function bootstrap() {
-	const environment = iocContainer.resolve("environment");
 	/** @type {import('./config/ioc/container-adapter.js').ContainerAdapter} */
 	const containerAdapter = iocContainer.resolve("containerAdapter");
 
-	const { dbClient, migrateDb } = dbProvider({ environment });
+	/** @type {ReturnType<typeof import("./core/database/db-provider.js").dbProvider} */
+	const { dbClient, migrateDb } = containerAdapter.resolve("dbProvider");
 
 	containerAdapter.registerValue("dbClient", dbClient);
-	/**
-	 * @type {import('./core/server-app.js').ServerApp}
-	 */
-	const serverApp = iocContainer.resolve("serverApp");
+
+	/** @type {import('./core/server-app.js').ServerApp} */
+	const serverApp = containerAdapter.resolve("serverApp");
 
 	/** @type {ReturnType<typeof import('./core/socket-client/socket-client-handler.js').socketClientHandler>} */
-	const socketClientHandler = iocContainer.resolve("socketClientHandler");
-
 	const {
 		scheduler,
 		wsClientGateway,
@@ -26,7 +22,7 @@ async function bootstrap() {
 		setupOutput,
 		setupGatewayClient,
 		setupScheduler,
-	} = await socketClientHandler;
+	} = containerAdapter.resolve("socketClientHandler");
 
 	try {
 		await migrateDb();

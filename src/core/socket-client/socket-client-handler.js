@@ -7,7 +7,7 @@ import { Scheduler } from "./scheduler.cjs";
  * @param {ReturnType<typeof import('../../modules/enterprise/enterprise-config-db.repository.js').enterpriseConfigDbRepository>} request.enterpriseConfigDbRepository
  * @param {ReturnType<typeof import('../../modules/enterprise/enterprise.repository.js').enterpriseRepository>} request.enterpriseRepository
  */
-export const socketClientHandler = async ({
+export const socketClientHandler = ({
 	environment,
 	enterpriseConfigDbRepository,
 	enterpriseRepository,
